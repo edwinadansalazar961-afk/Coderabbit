@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101014">
+  <title>Rootz Link — Enlaces directos</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+    :root { color-scheme: dark; font-family: 'DM Sans', sans-serif; background: #101014; color: #f5f3f0; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; background: radial-gradient(ellipse at 50% 30%, #25202a 0%, #151318 36%, #101014 75%); }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid #e2d0fd; outline-offset: 3px; }
+    .shell { width: min(1120px, calc(100% - 48px)); margin: auto; }
+    header { height: 88px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #ffffff12; }
+    .brand { display: flex; align-items: center; gap: 11px; font: 700 18px 'Space Grotesk', sans-serif; letter-spacing: -.04em; }
+    .brand-mark { width: 32px; height: 32px; display: grid; place-items: center; background: #ddd0f7; border-radius: 10px; color: #18131e; }
+    .brand-mark svg { width: 19px; }
+    .top-note { color: #a6a0aa; font-size: 12px; letter-spacing: .02em; display: flex; gap: 8px; align-items: center; }
+    .dot { height: 6px; width: 6px; background: #b7f0b7; border-radius: 50%; box-shadow: 0 0 10px #b7f0b788; }
+    main { max-width: 740px; margin: 0 auto; padding: 95px 0 104px; }
+    .eyebrow { display: flex; align-items: center; justify-content: center; gap: 10px; color: #c1a6e4; font-size: 11px; font-weight: 700; letter-spacing: .17em; text-transform: uppercase; }
+    .eyebrow:before, .eyebrow:after { content: ''; height: 1px; width: 24px; background: #826a9c; }
+    h1 { margin: 22px 0 15px; text-align: center; font: 600 clamp(38px, 6vw, 62px)/1.07 'Space Grotesk', sans-serif; letter-spacing: -.055em; }
+    h1 span { color: #cdb7ee; }
+    .intro { color: #aaa5ae; text-align: center; line-height: 1.7; margin: 0 auto; max-width: 490px; font-size: 15px; }
+    .card { margin-top: 47px; border: 1px solid #ffffff17; border-radius: 18px; background: #1b1a20; box-shadow: 0 28px 70px #0005; overflow: hidden; }
+    .card-inner { padding: 30px; }
+    .card-heading { display: flex; align-items: flex-start; gap: 13px; margin-bottom: 25px; }
+    .icon-box { width: 42px; height: 42px; flex: none; display: grid; place-items: center; background: #cdb7ee19; border: 1px solid #cdb7ee25; color: #d7bff6; border-radius: 12px; }
+    .icon-box svg { width: 19px; }
+    h2 { font: 600 17px 'Space Grotesk', sans-serif; margin: 1px 0 5px; letter-spacing: -.02em; }
+    .sub { font-size: 13px; color: #928d98; margin: 0; }
+    label { display: block; color: #d2ced4; font-size: 12px; font-weight: 700; margin-bottom: 9px; }
+    .input-wrap { display: flex; align-items: center; background: #111115; border: 1px solid #39363e; border-radius: 10px; padding: 5px 5px 5px 15px; transition: border-color .2s; }
+    .input-wrap:focus-within { border-color: #bca0e2; }
+    .input-wrap svg { flex: none; width: 17px; color: #79737e; }
+    input { width: 100%; min-width: 0; height: 42px; border: 0; outline: 0; background: transparent; color: #f4f1f5; padding: 0 12px; font-size: 14px; }
+    input::placeholder { color: #6f6973; }
+    .paste { border: 0; background: #29272e; color: #c7c2cb; border-radius: 7px; padding: 9px 12px; font-size: 12px; font-weight: 600; }
+    .paste:hover { background: #37333e; }
+    .submit { width: 100%; min-height: 50px; margin-top: 14px; border: 0; border-radius: 10px; background: #d5c1ef; color: #21172c; font-weight: 700; font-size: 14px; display: flex; gap: 9px; align-items: center; justify-content: center; transition: background .2s, transform .2s; }
+    .submit:hover { background: #e4d4fa; transform: translateY(-1px); }
+    .submit:disabled { opacity: .65; cursor: wait; transform: none; }
+    .submit svg { width: 17px; }
+    details { margin-top: 16px; }
+    summary { color: #bbb3c2; font-size: 12px; font-weight: 600; cursor: pointer; width: fit-content; }
+    summary:hover { color: #e5d9f3; }
+    .password-field { margin-top: 14px; }
+    .password-field input { padding-left: 15px; }
+    .cooldown { color: #dfc89b; font-size: 12px; margin: 12px 0 0; }
+    .cooldown:empty { display: none; }
+    .result-note { color: #a6a0aa; font-size: 12px; line-height: 1.5; margin: 13px 0 0; }
+    .hint { margin: 15px 0 0; font-size: 12px; color: #817b86; line-height: 1.5; }
+    .hint strong { color: #b0a9b5; font-weight: 500; }
+    .result { border-top: 1px solid #ffffff12; padding: 24px 30px 28px; background: #17161b; }
+    .result[hidden], .message[hidden] { display: none; }
+    .result-title { display: flex; gap: 8px; align-items: center; color: #bce3bd; font-size: 12px; font-weight: 700; margin-bottom: 12px; }
+    .result-title svg { width: 16px; }
+    .result-row { display: flex; gap: 10px; align-items: stretch; }
+    .result-link { flex: 1; min-width: 0; padding: 13px; border: 1px solid #39363e; border-radius: 9px; background: #111115; color: #d2bddf; font-size: 13px; overflow-wrap: anywhere; line-height: 1.5; }
+    .copy { border: 1px solid #51475b; border-radius: 9px; background: #302a38; color: #eee5f5; padding: 0 16px; font-weight: 700; font-size: 12px; }
+    .copy:hover { background: #40364b; }
+    .message { margin: 14px 0 0; color: #f3aaa7; font-size: 13px; line-height: 1.5; }
+    .steps { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 35px; color: #8e8892; font-size: 12px; }
+    .steps b { color: #c8b3e2; font: 600 11px 'Space Grotesk', sans-serif; margin-right: 6px; }
+    .divider { width: 26px; height: 1px; background: #49414e; }
+    footer { border-top: 1px solid #ffffff12; padding: 24px 0; color: #77717c; font-size: 12px; display: flex; justify-content: space-between; gap: 20px; }
+    footer span:last-child { color: #a49caa; }
+    @media (max-width: 600px) { .shell { width: min(100% - 32px, 1120px); } header { height: 72px; } .top-note { font-size: 11px; } main { padding: 72px 0 80px; } .card { margin-top: 36px; } .card-inner, .result { padding: 22px; } .result-row { flex-direction: column; } .copy { min-height: 42px; } .steps { gap: 8px; font-size: 11px; } .divider { width: 12px; } footer { flex-direction: column; gap: 8px; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"/><path d="M14 11a5 5 0 0 0-7.1 0l-2 2a5 5 0 0 0 7.1 7.1l1.1-1.1"/></svg></span> rootz link</div>
+      <div class="top-note"><span class="dot"></span> Herramienta de enlaces</div>
+    </header>
+    <main>
+      <div class="eyebrow">Simple y directo</div>
+      <h1>Tu enlace, <span>sin rodeos.</span></h1>
+      <p class="intro">Pega un enlace de Rootz y obtén el enlace directo de descarga listo para copiar.</p>
+      <section class="card" aria-labelledby="card-title">
+        <div class="card-inner">
+          <div class="card-heading"><div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-4-4 4 4 4-4"/><path d="M5 17v3h14v-3"/></svg></div><div><h2 id="card-title">Obtener enlace directo</h2><p class="sub">Solo necesitas el enlace de tu archivo.</p></div></div>
+          <form id="form" novalidate>
+            <label for="url">Enlace de Rootz</label>
+            <div class="input-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1 1"/><path d="M14 11a5 5 0 0 0-7.1 0l-2 2a5 5 0 0 0 7.1 7.1l1-1"/></svg><input id="url" type="url" inputmode="url" placeholder="https://www.rootz.so/d/..." autocomplete="url" required><button class="paste" id="paste" type="button">Pegar</button></div>
+            <details><summary>¿El archivo tiene contraseña?</summary><div class="password-field"><label for="password">Contraseña del archivo</label><div class="input-wrap"><input id="password" type="password" autocomplete="off" maxlength="1024" placeholder="Escribe la contraseña"></div></div></details>
+            <button class="submit" id="submit" type="submit"><span>Obtener enlace</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
+            <p class="cooldown" id="cooldown" aria-live="off"></p>
+            <p class="hint"><strong>Ejemplo:</strong> https://www.rootz.so/d/aXcg4<br>La consulta puede contar como una descarga en Rootz.</p>
+            <p class="message" id="message" role="alert" hidden></p>
+          </form>
+        </div>
+        <div class="result" id="result" hidden><div class="result-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg> Enlace directo listo</div><div class="result-row"><a class="result-link" id="result-link" target="_blank" rel="noopener noreferrer"></a><button class="copy" id="copy" type="button">Copiar enlace</button></div><p class="result-note">El enlace directo puede caducar. <span id="copy-status" role="status"></span></p></div>
+      </section>
+      <div class="steps" aria-label="Pasos"><span><b>01</b> Pega el enlace</span><span class="divider"></span><span><b>02</b> Obtén el enlace</span><span class="divider"></span><span><b>03</b> Copia y comparte</span></div>
+    </main>
+    <footer><span>rootz link &nbsp; / &nbsp; Una herramienta sencilla para tus archivos.</span><span>Hecho para compartir mejor ↗</span></footer>
+  </div>
+  <script>
+    const form = document.querySelector('#form');
+    const input = document.querySelector('#url');
+    const password = document.querySelector('#password');
+    const button = document.querySelector('#submit');
+    const result = document.querySelector('#result');
+    const resultLink = document.querySelector('#result-link');
+    const message = document.querySelector('#message');
+    const copy = document.querySelector('#copy');
+    const copyStatus = document.querySelector('#copy-status');
+    const cooldown = document.querySelector('#cooldown');
+    let revision = 0;
+    let busy = false;
+    let retryAt = 0;
+    let timer;
+    function showError(text) { message.textContent = text; message.hidden = false; }
+    function invalidate() { revision++; result.hidden = true; message.hidden = true; copyStatus.textContent = ''; }
+    input.addEventListener('input', invalidate);
+    password.addEventListener('input', invalidate);
+    function updateButton() {
+      const remaining = Math.max(0, Math.ceil((retryAt - Date.now()) / 1000));
+      button.disabled = busy || remaining > 0;
+      button.querySelector('span').textContent = busy ? 'Buscando enlace...' : 'Obtener enlace';
+      cooldown.textContent = remaining ? `Podrás intentarlo de nuevo en ${remaining} s.` : '';
+      if (!remaining && timer) { clearInterval(timer); timer = null; }
+    }
+    function startCooldown(seconds) {
+      retryAt = Date.now() + Math.min(seconds, 3600) * 1000;
+      clearInterval(timer);
+      updateButton();
+      timer = setInterval(updateButton, 1000);
+    }
+    document.querySelector('#paste').addEventListener('click', async () => {
+      try { input.value = await navigator.clipboard.readText(); input.dispatchEvent(new Event('input')); input.focus(); }
+      catch { showError('No se pudo leer el portapapeles. Pega el enlace manualmente.'); input.focus(); }
+    });
+    form.addEventListener('submit', async event => {
+      event.preventDefault();
+      if (busy || Date.now() < retryAt) return;
+      result.hidden = true; message.hidden = true;
+      if (!input.value.trim()) { showError('Pega un enlace de Rootz para continuar.'); input.focus(); return; }
+      const submittedRevision = revision;
+      busy = true; updateButton();
+      try {
+        const response = await fetch('/api/resolve', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: input.value.trim(), password: password.value }) });
+        const data = await response.json();
+        if (response.status === 429 && Number.isFinite(data.retryAfter) && data.retryAfter > 0) startCooldown(data.retryAfter);
+        if (revision !== submittedRevision) return;
+        if (!response.ok || !data.url) throw new Error(data.error || 'No se pudo obtener el enlace.');
+        resultLink.href = data.url; resultLink.textContent = data.url; copy.textContent = 'Copiar enlace'; copyStatus.textContent = ''; result.hidden = false;
+      } catch (error) { if (revision === submittedRevision) showError(error.message || 'No se pudo conectar con el servicio.'); }
+      finally { busy = false; updateButton(); }
+    });
+    copy.addEventListener('click', async () => {
+      try { await navigator.clipboard.writeText(resultLink.href); copy.textContent = '¡Copiado!'; copyStatus.textContent = 'Enlace copiado.'; }
+      catch {
+        const range = document.createRange(); range.selectNodeContents(resultLink);
+        const selection = window.getSelection(); selection.removeAllRanges(); selection.addRange(range);
+        copyStatus.textContent = 'Enlace seleccionado. Cópialo manualmente.';
+      }
+    });
+  </script>
+</body>
+</html>
