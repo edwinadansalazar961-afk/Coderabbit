@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: rootz-link-api
+    runtime: node
+    plan: free
+    buildCommand: 'true'
+    startCommand: node server.js
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: 24.21.0
+      - key: ALLOWED_ORIGIN
+        value: https://edwinadansalazar961-afk.github.io

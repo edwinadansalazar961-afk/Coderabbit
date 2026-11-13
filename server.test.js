@@ -73,3 +73,21 @@ test('HTTP endpoint validates content type and malformed input', async t => {
   assert.equal((await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{' })).status, 400);
   assert.equal((await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: 'https://example.com/d/a' }) })).status, 400);
 });
+
+test('allows the configured Pages origin to use the API and rejects other preflights', async t => {
+  const origin = 'https://edwinadansalazar961-afk.github.io';
+  const server = createServer(async () => new Response(null, { status: 302, headers: { location: 'https://cdn-files.alcyone.so/file' } }), origin);
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  t.after(() => server.close());
+  const endpoint = `http://127.0.0.1:${server.address().port}/api/resolve`;
+  const preflight = await fetch(endpoint, { method: 'OPTIONS', headers: { origin, 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'content-type' } });
+  assert.equal(preflight.status, 204);
+  assert.equal(preflight.headers.get('access-control-allow-origin'), origin);
+  assert.equal(preflight.headers.get('access-control-allow-headers'), 'Content-Type');
+  const response = await fetch(endpoint, { method: 'POST', headers: { origin, 'Content-Type': 'application/json' }, body: JSON.stringify({ url: 'https://rootz.so/d/example' }) });
+  assert.equal(response.headers.get('access-control-allow-origin'), origin);
+  assert.deepEqual(await response.json(), { url: 'https://cdn-files.alcyone.so/file' });
+  const rejected = await fetch(endpoint, { method: 'OPTIONS', headers: { origin: 'https://example.com' } });
+  assert.equal(rejected.status, 403);
+  assert.equal(rejected.headers.get('access-control-allow-origin'), null);
+});

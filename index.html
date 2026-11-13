@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#101014">
+  <meta name="rootz-api-base" content="">
   <title>Rootz Link — Enlaces directos</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
@@ -145,13 +146,21 @@
       const submittedRevision = revision;
       busy = true; updateButton();
       try {
-        const response = await fetch('/api/resolve', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: input.value.trim(), password: password.value }) });
+        const apiBase = document.querySelector('meta[name="rootz-api-base"]').content.trim();
+        if (!apiBase && location.hostname.endsWith('.github.io')) throw new Error('El servidor de descargas todavía no está configurado.');
+        let endpoint = '/api/resolve';
+        if (apiBase) {
+          const base = new URL(apiBase);
+          if (base.protocol !== 'https:' || base.username || base.password) throw new Error('La dirección del servidor no es válida.');
+          endpoint = new URL('/api/resolve', base).href;
+        }
+        const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: input.value.trim(), password: password.value }) });
         const data = await response.json();
         if (response.status === 429 && Number.isFinite(data.retryAfter) && data.retryAfter > 0) startCooldown(data.retryAfter);
         if (revision !== submittedRevision) return;
         if (!response.ok || !data.url) throw new Error(data.error || 'No se pudo obtener el enlace.');
         resultLink.href = data.url; resultLink.textContent = data.url; copy.textContent = 'Copiar enlace'; copyStatus.textContent = ''; result.hidden = false;
-      } catch (error) { if (revision === submittedRevision) showError(error.message || 'No se pudo conectar con el servicio.'); }
+      } catch (error) { if (revision === submittedRevision) showError(error instanceof TypeError || error instanceof SyntaxError ? 'No se pudo conectar con el servidor de descargas. Inténtalo de nuevo más tarde.' : error.message || 'No se pudo conectar con el servicio.'); }
       finally { busy = false; updateButton(); }
     });
     copy.addEventListener('click', async () => {

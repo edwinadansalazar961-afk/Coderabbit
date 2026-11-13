@@ -73,8 +73,21 @@ async function resolveLink(value, fetcher = fetch, password = '') {
   }
 }
 
-function createServer(fetcher = fetch) {
+function createServer(fetcher = fetch, allowedOrigin = process.env.ALLOWED_ORIGIN || '') {
   return http.createServer(async (req, res) => {
+    const origin = req.headers.origin;
+    res.setHeader('Vary', 'Origin');
+    if (origin && origin === allowedOrigin) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+    if (req.method === 'OPTIONS' && req.url === '/api/resolve') {
+      if (!origin || origin !== allowedOrigin) {
+        res.writeHead(403);
+        return res.end();
+      }
+      res.writeHead(204, { 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Max-Age': '600' });
+      return res.end();
+    }
     const sendJson = (status, data) => {
       res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
       res.end(JSON.stringify(data));
