@@ -96,7 +96,7 @@
             <p class="message" id="message" role="alert" hidden></p>
           </form>
         </div>
-        <div class="result" id="result" hidden><div class="result-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg> Enlace directo listo</div><div class="result-row"><a class="result-link" id="result-link" target="_blank" rel="noopener noreferrer"></a><button class="copy" id="copy" type="button">Copiar enlace</button></div><p class="result-note">El enlace directo puede caducar. <span id="copy-status" role="status"></span></p></div>
+        <div class="result" id="result" hidden><div class="result-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg> Enlace directo listo</div><div class="result-row"><a class="result-link" id="result-link" target="_blank" rel="noopener noreferrer"></a><button class="copy" id="copy" type="button">Copiar enlace</button></div><p class="result-note"><span id="result-source">El enlace directo puede caducar.</span> <span id="copy-status" role="status"></span></p></div>
       </section>
       <div class="steps" aria-label="Pasos"><span><b>01</b> Pega el enlace</span><span class="divider"></span><span><b>02</b> Obtén el enlace</span><span class="divider"></span><span><b>03</b> Copia y comparte</span></div>
     </main>
@@ -113,19 +113,54 @@
     const copy = document.querySelector('#copy');
     const copyStatus = document.querySelector('#copy-status');
     const cooldown = document.querySelector('#cooldown');
+    const resultSource = document.querySelector('#result-source');
+    // Keep public, unsigned links only in this tab and only briefly.
+    const linkCache = new Map();
+    const cacheLifetime = 120000;
+    function cacheKey(value) {
+      try {
+        const url = new URL(value.trim());
+        if (url.protocol !== 'https:' || !['rootz.so', 'www.rootz.so'].includes(url.hostname) || url.port || url.username || url.password) return null;
+        const match = url.pathname.match(/^\/d\/([a-zA-Z0-9_-]{1,100})\/?$/);
+        return match ? match[1] : null;
+      } catch { return null; }
+    }
+    function cachedLink(value) {
+      if (password.value) return null;
+      const key = cacheKey(value);
+      const entry = key && linkCache.get(key);
+      if (!entry) return null;
+      if (entry.expiresAt <= Date.now()) { linkCache.delete(key); return null; }
+      return entry.url;
+    }
+    function rememberLink(value, url) {
+      const key = cacheKey(value);
+      if (!key) return;
+      try {
+        const direct = new URL(url);
+        if (direct.protocol !== 'https:' || [...direct.searchParams.keys()].some(key => /^(expires|signature|token|x-amz-)/i.test(key))) return;
+      } catch { return; }
+      if (linkCache.size >= 50) linkCache.delete(linkCache.keys().next().value);
+      linkCache.set(key, { url, expiresAt: Date.now() + cacheLifetime });
+    }
+    function showResult(url, reused) {
+      resultLink.href = url; resultLink.textContent = url; copy.textContent = 'Copiar enlace'; copyStatus.textContent = '';
+      resultSource.textContent = reused ? 'Enlace reutilizado de esta pestaña; puede haber caducado.' : 'El enlace directo puede caducar.';
+      result.hidden = false;
+    }
     let revision = 0;
     let busy = false;
     let retryAt = 0;
     let timer;
     function showError(text) { message.textContent = text; message.hidden = false; }
-    function invalidate() { revision++; result.hidden = true; message.hidden = true; copyStatus.textContent = ''; }
+    function invalidate() { revision++; result.hidden = true; message.hidden = true; copyStatus.textContent = ''; updateButton(); }
     input.addEventListener('input', invalidate);
     password.addEventListener('input', invalidate);
     function updateButton() {
       const remaining = Math.max(0, Math.ceil((retryAt - Date.now()) / 1000));
-      button.disabled = busy || remaining > 0;
+      button.disabled = busy || (remaining > 0 && !cachedLink(input.value));
       button.querySelector('span').textContent = busy ? 'Buscando enlace...' : 'Obtener enlace';
-      cooldown.textContent = remaining ? `Podrás intentarlo de nuevo en ${remaining} s.` : '';
+      cooldown.textContent = remaining ? `Rootz permite nuevas consultas en ${remaining} s. Los enlaces recientes de esta pestaña se pueden reutilizar.` : '';
       if (!remaining && timer) { clearInterval(timer); timer = null; }
     }
     function startCooldown(seconds) {
@@ -140,10 +175,15 @@
     });
     form.addEventListener('submit', async event => {
       event.preventDefault();
-      if (busy || Date.now() < retryAt) return;
+      if (busy) return;
       result.hidden = true; message.hidden = true;
+      const cached = cachedLink(input.value);
+      if (cached) { showResult(cached, true); return; }
+      if (Date.now() < retryAt) return;
       if (!input.value.trim()) { showError('Pega un enlace de Rootz para continuar.'); input.focus(); return; }
       const submittedRevision = revision;
+      const submittedUrl = input.value.trim();
+      const submittedPassword = password.value;
       busy = true; updateButton();
       try {
         const apiBase = document.querySelector('meta[name="rootz-api-base"]').content.trim();
@@ -154,12 +194,13 @@
           if (base.protocol !== 'https:' || base.username || base.password) throw new Error('La dirección del servidor no es válida.');
           endpoint = new URL('/api/resolve', base).href;
         }
-        const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: input.value.trim(), password: password.value }) });
+        const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: submittedUrl, password: submittedPassword }) });
         const data = await response.json();
         if (response.status === 429 && Number.isFinite(data.retryAfter) && data.retryAfter > 0) startCooldown(data.retryAfter);
         if (revision !== submittedRevision) return;
         if (!response.ok || !data.url) throw new Error(data.error || 'No se pudo obtener el enlace.');
-        resultLink.href = data.url; resultLink.textContent = data.url; copy.textContent = 'Copiar enlace'; copyStatus.textContent = ''; result.hidden = false;
+        if (!submittedPassword) rememberLink(submittedUrl, data.url);
+        showResult(data.url, false);
       } catch (error) { if (revision === submittedRevision) showError(error instanceof TypeError || error instanceof SyntaxError ? 'No se pudo conectar con el servidor de descargas. Inténtalo de nuevo más tarde.' : error.message || 'No se pudo conectar con el servicio.'); }
       finally { busy = false; updateButton(); }
     });
