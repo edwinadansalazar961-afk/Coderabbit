@@ -2,7 +2,13 @@
 
 # Rootz Link
 
-Una página para obtener la URL a la que Rootz redirige una descarga pública.
+<!-- coderabbit-ai-generated:v1 -->
+
+<!-- coderabbit-ai-generated-section:v1:14adb15c3ad932d33a23be29320ea392f8f40987811b8e2dc3436342732c96e4 -->
+
+Una página para obtener enlaces directos de Rootz y AkiraBox cuando el proveedor los entrega.
+
+<!-- /coderabbit-ai-generated:v1 -->
 
 ## Ejecutar
 
@@ -48,7 +54,15 @@ Se puede introducir la contraseña de un archivo protegido; la aplicación la en
 
 <!-- coderabbit-ai-generated-section:v1:0a29d000bb9d6d4283fe93b95e8068b9b84f154054defbb93d4587feb1772fee -->
 
-Para evitar consultas repetidas, la página conserva durante dos minutos y solo en la pestaña los enlaces directos sin firma obtenidos sin contraseña. Los reutiliza sin comprobar de nuevo si siguen disponibles. Cuando Rootz devuelve un límite temporal, el servidor también intenta consultar su endpoint de metadatos para archivos que Rootz identifica como públicos, activos y disponibles. Este método depende de Rootz y puede dejar de funcionar o no estar disponible para algunos archivos. Los archivos protegidos mantienen el flujo de contraseña y sus límites.
+<!-- coderabbit-ai-generated:v1 -->
+
+<!-- coderabbit-ai-generated-section:v1:98a9d3dcdf8129d82748caa8909a81ea482f482df9d9faac35bb2a0d1765d60c -->
+
+Para evitar consultas repetidas, la página conserva durante dos minutos y solo en la pestaña los enlaces de Rootz sin firma obtenidos sin contraseña. Los reutiliza sin comprobar de nuevo si siguen disponibles. Cuando Rootz devuelve un límite temporal, el servidor también intenta consultar su endpoint de metadatos para archivos que Rootz identifica como públicos, activos y disponibles. Este método depende de Rootz y puede dejar de funcionar o no estar disponible para algunos archivos. Los archivos protegidos mantienen el flujo de contraseña y sus límites.
+
+AkiraBox puede exigir una verificación en su página antes de generar el enlace directo. En ese caso, la aplicación muestra un enlace para abrir AkiraBox y completar la comprobación; no puede devolver el enlace automáticamente. Las contraseñas de AkiraBox deben introducirse en AkiraBox.
+
+<!-- /coderabbit-ai-generated:v1 -->
 
 <!-- /coderabbit-ai-generated:v1 -->
 

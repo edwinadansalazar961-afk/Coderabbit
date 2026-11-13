@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#101014">
   <meta name="rootz-api-base" content="">
-  <title>Rootz Link — Enlaces directos</title>
+  <title>Link Studio — Enlaces directos</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
     :root { color-scheme: dark; --ink:#f6f3fa; --muted:#aaa4b3; --dim:#77727f; --line:rgba(255,255,255,.1); --accent:#d2baf6; font-family:'DM Sans',sans-serif; background:#111014; color:var(--ink); }
@@ -74,6 +74,8 @@
     .cooldown { color:#e3c999; font-size:12px; margin:13px 0 0; line-height:1.55; }
     .cooldown:empty { display:none; }
     .message { margin:16px 0 0; color:#ffc0bb; font-size:13px; line-height:1.5; }
+    .verification { margin:14px 0 0; padding:16px; border:1px solid #bda5d83b; border-radius:10px; background:#d2baf60b; color:#c6bdca; font-size:12px; line-height:1.6; }
+    .verification a { display:inline-block; margin-top:9px; color:#e3cff9; font-weight:700; text-underline-offset:3px; }
     .result { border-top:1px solid #ffffff12; padding:25px 34px 30px; background:#151419; }
     .result-title { display:flex; gap:8px; align-items:center; color:#bce3bd; font-size:12px; font-weight:700; margin-bottom:12px; }
     .result-title svg { width:16px; }
@@ -91,22 +93,22 @@
     footer { padding:25px 0 30px; color:#8e8692; font-size:11px; display:flex; justify-content:space-between; gap:20px; }
     footer strong { font-family:'Manrope',sans-serif; color:#c7bdca; font-weight:700; }
     @media (max-width:900px) { .shell { width:min(100% - 48px,700px); } main { padding:76px 0 48px; } .hero { grid-template-columns:1fr; gap:65px; } .hero-copy { max-width:580px; } h1 { font-size:clamp(57px,10vw,82px); } .card-wrap { max-width:620px; width:100%; } .steps { margin-top:80px; } }
-    @media (max-width:600px) { .shell { width:calc(100% - 36px); } header { height:76px; } .brand small { display:none; } .top-note { font-size:9px; letter-spacing:.08em; } main { padding:46px 0 40px; } .hero { gap:38px; } h1 { font-size:clamp(47px,12vw,64px); margin:20px 0 16px; } .intro { font-size:14px; } .hero-rule, .hero-foot { display:none; } .card-wrap::before { inset:-11px; border-radius:26px; transform:rotate(1.5deg); } .card-inner { padding:25px 21px; } .card-top { padding-bottom:20px; margin-bottom:23px; } .card-heading { margin-bottom:24px; } h2 { font-size:17px; } .result { padding:22px 21px; } .result-row { flex-direction:column; } .copy { min-height:44px; } .steps { margin-top:65px; grid-template-columns:1fr; } .step { padding:16px 0; } .step + .step { border-left:0; border-top:1px solid var(--line); padding-left:0; } footer { flex-direction:column; gap:9px; } }
+    @media (max-width:600px) { .shell { width:calc(100% - 36px); } header { height:76px; } .brand small { display:none; } .top-note { font-size:9px; letter-spacing:.08em; } main { padding:46px 0 40px; } .hero { gap:38px; } h1 { font-size:clamp(47px,12vw,64px); margin:20px 0 16px; } .intro { font-size:14px; } .hero-rule, .hero-foot { display:none; } .card-wrap::before { inset:-6px; border-radius:26px; transform:none; } .card-inner { padding:25px 21px; } .card-top { padding-bottom:20px; margin-bottom:23px; } .card-heading { margin-bottom:24px; } h2 { font-size:17px; } .result { padding:22px 21px; } .result-row { flex-direction:column; } .copy { min-height:44px; } .steps { margin-top:65px; grid-template-columns:1fr; } .step { padding:16px 0; } .step + .step { border-left:0; border-top:1px solid var(--line); padding-left:0; } footer { flex-direction:column; gap:9px; } }
     @media (prefers-reduced-motion:reduce) { *,*::before,*::after { transition:none !important; scroll-behavior:auto !important; } }
   </style>
 </head>
 <body>
   <div class="shell">
     <header>
-      <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"/><path d="M14 11a5 5 0 0 0-7.1 0l-2 2a5 5 0 0 0 7.1 7.1l1.1-1.1"/></svg></span> rootz link <small>Link studio</small></div>
-      <div class="top-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 2v20M2 12h20M5 5l14 14M19 5 5 19"/></svg> Hecho para Rootz</div>
+      <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"/><path d="M14 11a5 5 0 0 0-7.1 0l-2 2a5 5 0 0 0 7.1 7.1l1.1-1.1"/></svg></span> link studio <small>Enlaces directos</small></div>
+      <div class="top-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 2v20M2 12h20M5 5l14 14M19 5 5 19"/></svg> Rootz + AkiraBox</div>
     </header>
     <main>
       <div class="hero">
         <div class="hero-copy">
           <div class="eyebrow"><span class="spark" aria-hidden="true">✳</span> Una forma más simple de compartir</div>
           <h1>El enlace, en su forma <span>más directa.</span></h1>
-          <p class="intro">Convierte tu enlace de Rootz en un enlace directo de descarga. Pégalo, obtén el resultado y compártelo en un instante.</p>
+          <p class="intro">Convierte tu enlace de Rootz o AkiraBox en un enlace directo de descarga. Pégalo, obtén el resultado y compártelo en un instante.</p>
           <div class="hero-rule"></div>
           <div class="hero-foot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg> Tu archivo está a un enlace de distancia.</div>
         </div>
@@ -114,15 +116,15 @@
           <section class="card" aria-labelledby="card-title">
             <div class="card-inner">
               <div class="card-top"><span class="card-kicker">Tu espacio de enlaces</span><span class="card-index">01 / 01</span></div>
-              <div class="card-heading"><div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-4-4 4 4 4-4"/><path d="M5 17v3h14v-3"/></svg></div><div><h2 id="card-title">Obtener enlace directo</h2><p class="sub">Todo comienza con tu enlace de Rootz.</p></div></div>
+              <div class="card-heading"><div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-4-4 4 4 4-4"/><path d="M5 17v3h14v-3"/></svg></div><div><h2 id="card-title">Obtener enlace directo</h2><p class="sub">Pega tu enlace de Rootz o AkiraBox.</p></div></div>
               <form id="form" novalidate>
-                <label for="url">ENLACE DE ROOTZ</label>
-                <div class="input-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1 1"/><path d="M14 11a5 5 0 0 0-7.1 0l-2 2a5 5 0 0 0 7.1 7.1l1-1"/></svg><input id="url" type="url" inputmode="url" placeholder="https://www.rootz.so/d/..." autocomplete="url" required><button class="paste" id="paste" type="button">Pegar</button></div>
-                <details><summary>El archivo tiene contraseña</summary><div class="password-field"><label for="password">Contraseña del archivo</label><div class="input-wrap"><input id="password" type="password" autocomplete="off" maxlength="1024" placeholder="Escribe la contraseña"></div></div></details>
+                <label for="url">ENLACE DE ROOTZ O AKIRABOX</label>
+                <div class="input-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1 1"/><path d="M14 11a5 5 0 0 0-7.1 0l-2 2a5 5 0 0 0 7.1 7.1l1-1"/></svg><input id="url" type="url" inputmode="url" placeholder="https://rootz.so/d/... o akirabox.to/.../file" autocomplete="url" required><button class="paste" id="paste" type="button">Pegar</button></div>
+                <details><summary>El archivo de Rootz tiene contraseña</summary><div class="password-field"><label for="password">Contraseña del archivo</label><div class="input-wrap"><input id="password" type="password" autocomplete="off" maxlength="1024" placeholder="Escribe la contraseña"></div></div></details>
                 <button class="submit" id="submit" type="submit"><span>Obtener enlace directo</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
                 <p class="cooldown" id="cooldown" aria-live="off"></p>
-                <p class="hint"><strong>Ejemplo:</strong> https://www.rootz.so/d/aXcg4<br>La consulta puede contar como una descarga en Rootz.</p>
-                <p class="message" id="message" role="alert" hidden></p>
+                <p class="hint"><strong>Formatos:</strong> rootz.so/d/... · akirabox.to/.../file<br>La consulta puede contar como una descarga.</p>
+                <p class="message" id="message" role="alert" hidden></p><div class="verification" id="verification" hidden>En AkiraBox, completa la verificación y copia la dirección del botón de descarga.<br><a id="verification-link" target="_blank" rel="noopener noreferrer">Abrir AkiraBox ↗</a></div>
               </form>
             </div>
             <div class="result" id="result" hidden aria-live="polite"><div class="result-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg> Enlace directo listo</div><div class="result-row"><a class="result-link" id="result-link" target="_blank" rel="noopener noreferrer"></a><button class="copy" id="copy" type="button">Copiar enlace</button></div><p class="result-note"><span id="result-source">El enlace directo puede caducar.</span> <span id="copy-status" role="status"></span></p></div>
@@ -130,12 +132,12 @@
         </div>
       </div>
       <section class="steps" aria-label="Cómo funciona">
-        <div class="step"><span class="step-number">01</span><span><span class="step-title">Pega tu enlace</span><span class="step-text">Añade la dirección de Rootz.</span></span></div>
+        <div class="step"><span class="step-number">01</span><span><span class="step-title">Pega tu enlace</span><span class="step-text">Añade la dirección del archivo.</span></span></div>
         <div class="step"><span class="step-number">02</span><span><span class="step-title">Obtén el resultado</span><span class="step-text">Buscamos el enlace directo.</span></span></div>
         <div class="step"><span class="step-number">03</span><span><span class="step-title">Listo para compartir</span><span class="step-text">Copia y utiliza tu enlace.</span></span></div>
       </section>
     </main>
-    <footer><span><strong>rootz link</strong> &nbsp; / &nbsp; Enlaces que llegan más lejos.</span><span>Diseñado para hacer las cosas simples &nbsp; ↗</span></footer>
+    <footer><span><strong>link studio</strong> &nbsp; / &nbsp; Enlaces que llegan más lejos.</span><span>Diseñado para hacer las cosas simples &nbsp; ↗</span></footer>
   </div>
   <script>
     const form = document.querySelector('#form');
@@ -149,6 +151,8 @@
     const copyStatus = document.querySelector('#copy-status');
     const cooldown = document.querySelector('#cooldown');
     const resultSource = document.querySelector('#result-source');
+    const verification = document.querySelector('#verification');
+    const verificationLink = document.querySelector('#verification-link');
     // Keep public, unsigned links only in this tab and only briefly.
     const linkCache = new Map();
     const cacheLifetime = 120000;
@@ -188,12 +192,12 @@
     let retryAt = 0;
     let timer;
     function showError(text) { message.textContent = text; message.hidden = false; }
-    function invalidate() { revision++; result.hidden = true; message.hidden = true; copyStatus.textContent = ''; updateButton(); }
+    function invalidate() { revision++; result.hidden = true; message.hidden = true; verification.hidden = true; copyStatus.textContent = ''; updateButton(); }
     input.addEventListener('input', invalidate);
     password.addEventListener('input', invalidate);
     function updateButton() {
       const remaining = Math.max(0, Math.ceil((retryAt - Date.now()) / 1000));
-      button.disabled = busy || (remaining > 0 && !cachedLink(input.value));
+      button.disabled = busy || (remaining > 0 && !!cacheKey(input.value) && !cachedLink(input.value));
       button.querySelector('span').textContent = busy ? 'Buscando enlace...' : 'Obtener enlace directo';
       cooldown.textContent = remaining ? `Rootz permite nuevas consultas en ${remaining} s. Los enlaces recientes de esta pestaña se pueden reutilizar.` : '';
       if (!remaining && timer) { clearInterval(timer); timer = null; }
@@ -211,11 +215,11 @@
     form.addEventListener('submit', async event => {
       event.preventDefault();
       if (busy) return;
-      result.hidden = true; message.hidden = true;
+      result.hidden = true; message.hidden = true; verification.hidden = true;
       const cached = cachedLink(input.value);
       if (cached) { showResult(cached, true); return; }
-      if (Date.now() < retryAt) return;
-      if (!input.value.trim()) { showError('Pega un enlace de Rootz para continuar.'); input.focus(); return; }
+      if (Date.now() < retryAt && cacheKey(input.value)) return;
+      if (!input.value.trim()) { showError('Pega un enlace de Rootz o AkiraBox para continuar.'); input.focus(); return; }
       const submittedRevision = revision;
       const submittedUrl = input.value.trim();
       const submittedPassword = password.value;
@@ -233,7 +237,17 @@
         const data = await response.json();
         if (response.status === 429 && Number.isFinite(data.retryAfter) && data.retryAfter > 0) startCooldown(data.retryAfter);
         if (revision !== submittedRevision) return;
-        if (!response.ok || !data.url) throw new Error(data.error || 'No se pudo obtener el enlace.');
+        if (!response.ok || !data.url) {
+          if (response.status === 403 && typeof data.verificationUrl === 'string') {
+            try {
+              const target = new URL(data.verificationUrl);
+              if (target.origin === 'https://akirabox.to' && /^\/[a-zA-Z0-9_-]{1,100}\/file$/.test(target.pathname)) {
+                verificationLink.href = target.href; verification.hidden = false;
+              }
+            } catch { /* Ignore invalid verification links. */ }
+          }
+          throw new Error(data.error || 'No se pudo obtener el enlace.');
+        }
         if (!submittedPassword) rememberLink(submittedUrl, data.url);
         showResult(data.url, false);
       } catch (error) { if (revision === submittedRevision) showError(error instanceof TypeError || error instanceof SyntaxError ? 'No se pudo conectar con el servidor de descargas. Inténtalo de nuevo más tarde.' : error.message || 'No se pudo conectar con el servicio.'); }

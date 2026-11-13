@@ -1,6 +1,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { shortIdFromUrl, resolveLink, createServer } = require('./server');
+const { shortIdFromUrl, akiraIdFromUrl, resolveLink, resolveAkira, createServer } = require('./server');
 
 test('accepts Rootz download links and rejects other hosts and paths', () => {
   assert.equal(shortIdFromUrl(' https://www.rootz.so/d/aXcg4?ref=share '), 'aXcg4');
@@ -150,4 +150,43 @@ test('does not attempt public metadata resolution for password requests', async 
   }, 'secret');
   assert.equal(result.status, 429);
   assert.equal(calls, 2);
+});
+
+
+test('validates AkiraBox URLs and rejects lookalike hosts and other paths', () => {
+  assert.equal(akiraIdFromUrl('https://akirabox.to/N2p3Ddgp93Ma/file'), 'N2p3Ddgp93Ma');
+  assert.equal(akiraIdFromUrl('https://www.akirabox.com/example_1/file/?share=1'), 'example_1');
+  for (const url of ['https://akirabox.to.evil.test/abc/file', 'http://akirabox.to/abc/file', 'https://akirabox.to:444/abc/file', 'https://user@akirabox.to/abc/file', 'https://akirabox.to/abc/folder', 'https://akirabox.to/abc/file/extra']) assert.equal(akiraIdFromUrl(url), null);
+});
+
+test('returns a direct AkiraBox URL only from the expected download endpoint', async () => {
+  let request;
+  const result = await resolveAkira('https://akirabox.to/example/file', async (url, options) => {
+    request = { url, options };
+    return Response.json({ ok: true, url: 'https://akirabox.com/download/token/example.pkg' });
+  });
+  assert.equal(request.url, 'https://akirabox.to/api/files/example/download');
+  assert.equal(request.options.method, 'POST');
+  assert.equal(request.options.redirect, 'manual');
+  assert.deepEqual(result, { status: 200, url: 'https://akirabox.com/download/token/example.pkg' });
+});
+
+test('reports AkiraBox verification, unavailable files and invalid direct links', async () => {
+  const source = 'https://akirabox.to/example/file';
+  const verification = await resolveAkira(source, async () => Response.json({ ok: false, captcha: true }, { status: 403 }));
+  assert.equal(verification.status, 403);
+  assert.equal(verification.verificationUrl, source);
+  assert.equal((await resolveAkira(source, async () => Response.json({ error: 'missing' }, { status: 404 }))).status, 404);
+  assert.equal((await resolveAkira(source, async () => Response.json({ url: 'https://akirabox.to/example/file' }))).status, 502);
+  assert.equal((await resolveAkira(source, async () => Response.json({ url: 'https://evil.test/download/token/file' }))).status, 502);
+  assert.equal((await resolveAkira(source, async () => Response.json({ url: 'https://akirabox.com/download/token/file' }), 'secret')).status, 400);
+});
+
+test('HTTP endpoint routes AkiraBox requests and preserves verification information', async t => {
+  const server = createServer(async () => Response.json({ ok: false, captcha: true }, { status: 403 }));
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  t.after(() => server.close());
+  const response = await fetch(`http://127.0.0.1:${server.address().port}/api/resolve`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: 'https://akirabox.to/example/file' }) });
+  assert.equal(response.status, 403);
+  assert.equal((await response.json()).verificationUrl, 'https://akirabox.to/example/file');
 });

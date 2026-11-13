@@ -29,8 +29,8 @@ function rateLimit(response) {
 
 // Rootz also exposes a public metadata endpoint that can return a direct URL.
 // Only use it when both responses explicitly identify an active, public file.
-async function readBoundedText(response, maxBytes = 1024 * 1024) {
-  if (!response.ok || !response.body) return null;
+async function readBoundedText(response, maxBytes = 1024 * 1024, requireOk = true) {
+  if ((requireOk && !response.ok) || !response.body) return null;
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let text = '';
@@ -79,7 +79,7 @@ async function publicMetadataLink(id, fetcher, headers) {
 
 async function resolveLink(value, fetcher = fetch, password = '') {
   const id = shortIdFromUrl(value);
-  if (!id) return { status: 400, error: 'Introduce un enlace válido de Rootz, por ejemplo https://www.rootz.so/d/aXcg4.' };
+  if (!id) return { status: 400, error: 'Introduce un enlace válido de Rootz o AkiraBox.' };
   if (typeof password !== 'string' || password.length > 1024) return { status: 400, error: 'La contraseña no es válida.' };
 
   try {
@@ -129,6 +129,45 @@ async function resolveLink(value, fetcher = fetch, password = '') {
   }
 }
 
+function akiraIdFromUrl(value) {
+  if (typeof value !== 'string' || value.length > 2048) return null;
+  try {
+    const url = new URL(value.trim());
+    if (url.protocol !== 'https:' || !['akirabox.to', 'www.akirabox.to', 'akirabox.com', 'www.akirabox.com'].includes(url.hostname) || url.port || url.username || url.password) return null;
+    return url.pathname.match(/^\/([a-zA-Z0-9_-]{1,100})\/file\/?$/)?.[1] || null;
+  } catch { return null; }
+}
+
+async function resolveAkira(value, fetcher = fetch, password = '') {
+  const id = akiraIdFromUrl(value);
+  if (!id) return { status: 400, error: 'Introduce un enlace válido de AkiraBox.' };
+  if (typeof password !== 'string' || password.length > 1024) return { status: 400, error: 'La contraseña no es válida.' };
+  if (password) return { status: 400, error: 'Para archivos de AkiraBox con contraseña, utiliza la página de AkiraBox.' };
+  try {
+    const response = await fetcher(`https://akirabox.to/api/files/${encodeURIComponent(id)}/download`, {
+      method: 'POST', redirect: 'manual', signal: AbortSignal.timeout(15000),
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: '{}'
+    });
+    const body = await readBoundedText(response, 128 * 1024, false);
+    let data;
+    try { data = JSON.parse(body); } catch { return { status: 502, error: 'AkiraBox no devolvió una respuesta válida.' }; }
+    if (data?.captcha === true) return {
+      status: 403, error: 'AkiraBox requiere una verificación. Ábrelo y completa la comprobación para obtener el enlace.',
+      verificationUrl: `https://akirabox.to/${encodeURIComponent(id)}/file`
+    };
+    if (response.status === 404) return { status: 404, error: 'AkiraBox no encontró el archivo. Comprueba si el enlace sigue activo.' };
+    if (response.status === 429) return { status: 429, error: 'AkiraBox ha limitado las solicitudes. Inténtalo de nuevo más tarde.' };
+    if (!response.ok || data?.ok === false || typeof data?.url !== 'string') return { status: 502, error: 'AkiraBox no devolvió un enlace directo. El archivo puede estar protegido o no estar disponible.' };
+    const direct = new URL(data.url);
+    if (direct.protocol !== 'https:' || direct.username || direct.password || direct.port || !['akirabox.to', 'akirabox.com'].includes(direct.hostname) || !/^\/download\/[^/]+\/[^/]+$/.test(direct.pathname)) {
+      return { status: 502, error: 'AkiraBox no devolvió un enlace directo válido.' };
+    }
+    return { status: 200, url: direct.href };
+  } catch {
+    return { status: 502, error: 'No se pudo conectar con AkiraBox. Inténtalo de nuevo más tarde.' };
+  }
+}
+
 function createServer(fetcher = fetch, allowedOrigin = process.env.ALLOWED_ORIGIN || '') {
   return http.createServer(async (req, res) => {
     const origin = req.headers.origin;
@@ -161,8 +200,10 @@ function createServer(fetcher = fetch, allowedOrigin = process.env.ALLOWED_ORIGI
     }
     let input;
     try { input = JSON.parse(body); } catch { return sendJson(400, { error: 'Solicitud inválida.' }); }
-    const result = await resolveLink(input?.url, fetcher, input?.password ?? '');
-    return sendJson(result.status, result.url ? { url: result.url } : { error: result.error, ...(result.retryAfter ? { retryAfter: result.retryAfter } : {}) });
+    const result = akiraIdFromUrl(input?.url)
+      ? await resolveAkira(input.url, fetcher, input?.password ?? '')
+      : await resolveLink(input?.url, fetcher, input?.password ?? '');
+    return sendJson(result.status, result.url ? { url: result.url } : { error: result.error, ...(result.retryAfter ? { retryAfter: result.retryAfter } : {}), ...(result.verificationUrl ? { verificationUrl: result.verificationUrl } : {}) });
   });
 }
 
@@ -170,4 +211,4 @@ if (require.main === module) {
   const port = Number(process.env.PORT) || 4173;
   createServer().listen(port, '0.0.0.0', () => console.log(`Rootz Link listo en http://localhost:${port}`));
 }
-module.exports = { shortIdFromUrl, resolveLink, createServer };
+module.exports = { shortIdFromUrl, akiraIdFromUrl, resolveLink, resolveAkira, createServer };
