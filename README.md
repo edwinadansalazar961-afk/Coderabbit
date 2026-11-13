@@ -44,7 +44,13 @@ El servidor permite peticiones desde `https://edwinadansalazar961-afk.github.io`
 
 Se puede introducir la contraseña de un archivo protegido; la aplicación la envía a Rootz para verificarla y no la guarda. El flujo con contraseña depende de Rootz y no se ha probado con un archivo protegido real. Rootz también puede limitar las descargas, bloquear solicitudes, retirar archivos o exigir inicio de sesión. Esos enlaces pueden no resolverse. Consultar la URL cuenta como una solicitud de descarga y puede activar el límite de Rootz. Las URL directas pueden caducar.
 
-Para evitar consultas repetidas, la página conserva durante dos minutos y solo en la pestaña los enlaces directos sin firma obtenidos sin contraseña. Los reutiliza sin comprobar de nuevo si siguen disponibles. Las consultas para archivos nuevos y los enlaces protegidos siguen sujetos al límite de Rootz.
+<!-- coderabbit-ai-generated:v1 -->
+
+<!-- coderabbit-ai-generated-section:v1:0a29d000bb9d6d4283fe93b95e8068b9b84f154054defbb93d4587feb1772fee -->
+
+Para evitar consultas repetidas, la página conserva durante dos minutos y solo en la pestaña los enlaces directos sin firma obtenidos sin contraseña. Los reutiliza sin comprobar de nuevo si siguen disponibles. Cuando Rootz devuelve un límite temporal, el servidor también intenta consultar su endpoint de metadatos para archivos que Rootz identifica como públicos, activos y disponibles. Este método depende de Rootz y puede dejar de funcionar o no estar disponible para algunos archivos. Los archivos protegidos mantienen el flujo de contraseña y sus límites.
+
+<!-- /coderabbit-ai-generated:v1 -->
 
 <!-- /coderabbit-ai-generated:v1 -->
 

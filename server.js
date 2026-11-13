@@ -27,6 +27,56 @@ function rateLimit(response) {
   return { status: 429, error: 'Rootz ha limitado las descargas. Espera antes de intentarlo de nuevo.', retryAfter: retrySeconds(response) };
 }
 
+// Rootz also exposes a public metadata endpoint that can return a direct URL.
+// Only use it when both responses explicitly identify an active, public file.
+async function readBoundedText(response, maxBytes = 1024 * 1024) {
+  if (!response.ok || !response.body) return null;
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let text = '';
+  let bytes = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) return text + decoder.decode();
+    bytes += value.byteLength;
+    if (bytes > maxBytes) { await reader.cancel().catch(() => {}); return null; }
+    text += decoder.decode(value, { stream: true });
+  }
+}
+
+function isPublicFile(data) {
+  return data && data.status === 'active' && data.downloadAllowed === true && data.passwordProtected === false;
+}
+
+async function publicMetadataLink(id, fetcher, headers) {
+  try {
+    const base = 'https://www.rootz.so';
+    const opts = { redirect: 'manual', signal: AbortSignal.timeout(15000), headers };
+    const page = await fetcher(`${base}/d/${encodeURIComponent(id)}`, opts);
+    const html = await readBoundedText(page);
+    const token = html?.match(/pageToken\\?"\s*:\s*\\?"([^"\\]+)/)?.[1];
+    if (!token || token.length > 512) return null;
+    const metadata = await fetcher(`${base}/api/files/download-by-short?shortId=${encodeURIComponent(id)}`, {
+      ...opts, signal: AbortSignal.timeout(15000), headers: { ...headers, 'X-Page-Token': token }
+    });
+    const metaText = await readBoundedText(metadata);
+    if (!metaText) return null;
+    const meta = JSON.parse(metaText);
+    const fileId = meta?.data?.fileId;
+    if (!meta.success || !isPublicFile(meta.data) || typeof fileId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(fileId)) return null;
+    const directResponse = await fetcher(`${base}/api/files/download/${fileId}`, { ...opts, signal: AbortSignal.timeout(15000) });
+    const directText = await readBoundedText(directResponse);
+    if (!directText) return null;
+    const payload = JSON.parse(directText);
+    if (!payload.success || !isPublicFile(payload.data) || typeof payload.data.url !== 'string') return null;
+    const direct = new URL(payload.data.url);
+    if (direct.protocol !== 'https:' || direct.username || direct.password || direct.hostname === 'rootz.so' || direct.hostname.endsWith('.rootz.so')) return null;
+    return direct.href;
+  } catch {
+    return null;
+  }
+}
+
 async function resolveLink(value, fetcher = fetch, password = '') {
   const id = shortIdFromUrl(value);
   if (!id) return { status: 400, error: 'Introduce un enlace válido de Rootz, por ejemplo https://www.rootz.so/d/aXcg4.' };
@@ -64,7 +114,13 @@ async function resolveLink(value, fetcher = fetch, password = '') {
       }
       return { status: 502, error: 'Rootz no devolvió un enlace directo de descarga.' };
     }
-    if (response.status === 429) return rateLimit(response);
+    if (response.status === 429) {
+      if (!password) {
+        const url = await publicMetadataLink(id, fetcher, headers);
+        if (url) return { status: 200, url };
+      }
+      return rateLimit(response);
+    }
     if (response.status === 404) return { status: 404, error: 'Rootz no encontró el archivo. Comprueba si el enlace sigue activo.' };
     if (response.status === 401 || response.status === 403) return { status: 502, error: 'Rootz rechazó la solicitud. Comprueba si el archivo necesita contraseña o si sigue disponible.' };
     return { status: 502, error: 'Rootz no devolvió un enlace directo. El archivo puede estar protegido, caducado o no estar disponible.' };

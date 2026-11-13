@@ -91,3 +91,63 @@ test('allows the configured Pages origin to use the API and rejects other prefli
   assert.equal(rejected.status, 403);
   assert.equal(rejected.headers.get('access-control-allow-origin'), null);
 });
+
+test('uses public file metadata when Rootz returns a cooldown', async () => {
+  const calls = [];
+  const id = 'f54851ba-8eb3-4861-a9f3-8790c6d3353d';
+  const publicFile = { status: 'active', downloadAllowed: true, passwordProtected: false };
+  const result = await resolveLink('https://rootz.so/d/example', async (url, options) => {
+    calls.push({ url, options });
+    if (calls.length === 1) return new Response(null, { status: 429, headers: { 'Retry-After': '120' } });
+    if (calls.length === 2) return new Response('<script>{"pageToken":"test-token"}</script>');
+    if (calls.length === 3) return Response.json({ success: true, data: { ...publicFile, fileId: id } });
+    return Response.json({ success: true, data: { ...publicFile, url: 'https://cdn-files.alcyone.so/example.txt' } });
+  });
+  assert.deepEqual(result, { status: 200, url: 'https://cdn-files.alcyone.so/example.txt' });
+  assert.equal(calls[2].options.headers['X-Page-Token'], 'test-token');
+  assert.equal(calls[3].url, `https://www.rootz.so/api/files/download/${id}`);
+});
+
+test('does not return alternate URLs for protected, inactive or disallowed files', async () => {
+  const id = 'f54851ba-8eb3-4861-a9f3-8790c6d3353d';
+  const publicFile = { status: 'active', downloadAllowed: true, passwordProtected: false, fileId: id };
+  for (const changes of [{ passwordProtected: true }, { status: 'deleted' }, { downloadAllowed: false }, { passwordProtected: undefined }]) {
+    let calls = 0;
+    const result = await resolveLink('https://rootz.so/d/example', async () => {
+      calls++;
+      if (calls === 1) return new Response(null, { status: 429, headers: { 'Retry-After': '120' } });
+      if (calls === 2) return new Response('"pageToken":"test-token"');
+      return Response.json({ success: true, data: { ...publicFile, ...changes } });
+    });
+    assert.equal(result.status, 429);
+    assert.equal(calls, 3);
+  }
+});
+
+test('falls back to the cooldown if the alternate response is invalid or changes access', async () => {
+  const id = 'f54851ba-8eb3-4861-a9f3-8790c6d3353d';
+  const publicFile = { status: 'active', downloadAllowed: true, passwordProtected: false };
+  for (const changes of [{ passwordProtected: true }, { status: 'deleted' }, { downloadAllowed: false }, { url: 'https://www.rootz.so/login' }, { url: 'http://cdn.example/file' }]) {
+    let calls = 0;
+    const result = await resolveLink('https://rootz.so/d/example', async () => {
+      calls++;
+      if (calls === 1) return new Response(null, { status: 429, headers: { 'Retry-After': '120' } });
+      if (calls === 2) return new Response('"pageToken":"test-token"');
+      if (calls === 3) return Response.json({ success: true, data: { ...publicFile, fileId: id } });
+      return Response.json({ success: true, data: { ...publicFile, url: 'https://cdn.example/file', ...changes } });
+    });
+    assert.equal(result.status, 429);
+    assert.equal(result.retryAfter, 120);
+  }
+});
+
+test('does not attempt public metadata resolution for password requests', async () => {
+  let calls = 0;
+  const result = await resolveLink('https://rootz.so/d/example', async () => {
+    calls++;
+    if (calls === 1) return Response.json({ success: true, token: 'token' });
+    return new Response(null, { status: 429, headers: { 'Retry-After': '60' } });
+  }, 'secret');
+  assert.equal(result.status, 429);
+  assert.equal(calls, 2);
+});
