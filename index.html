@@ -7,100 +7,135 @@
   <meta name="rootz-api-base" content="">
   <title>Rootz Link — Enlaces directos</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
-    :root { color-scheme: dark; font-family: 'DM Sans', sans-serif; background: #101014; color: #f5f3f0; }
-    * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; background: radial-gradient(ellipse at 50% 30%, #25202a 0%, #151318 36%, #101014 75%); }
-    button, input { font: inherit; }
-    button { cursor: pointer; }
-    button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid #e2d0fd; outline-offset: 3px; }
-    .shell { width: min(1120px, calc(100% - 48px)); margin: auto; }
-    header { height: 88px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #ffffff12; }
-    .brand { display: flex; align-items: center; gap: 11px; font: 700 18px 'Space Grotesk', sans-serif; letter-spacing: -.04em; }
-    .brand-mark { width: 32px; height: 32px; display: grid; place-items: center; background: #ddd0f7; border-radius: 10px; color: #18131e; }
-    .brand-mark svg { width: 19px; }
-    .top-note { color: #a6a0aa; font-size: 12px; letter-spacing: .02em; display: flex; gap: 8px; align-items: center; }
-    .dot { height: 6px; width: 6px; background: #b7f0b7; border-radius: 50%; box-shadow: 0 0 10px #b7f0b788; }
-    main { max-width: 740px; margin: 0 auto; padding: 95px 0 104px; }
-    .eyebrow { display: flex; align-items: center; justify-content: center; gap: 10px; color: #c1a6e4; font-size: 11px; font-weight: 700; letter-spacing: .17em; text-transform: uppercase; }
-    .eyebrow:before, .eyebrow:after { content: ''; height: 1px; width: 24px; background: #826a9c; }
-    h1 { margin: 22px 0 15px; text-align: center; font: 600 clamp(38px, 6vw, 62px)/1.07 'Space Grotesk', sans-serif; letter-spacing: -.055em; }
-    h1 span { color: #cdb7ee; }
-    .intro { color: #aaa5ae; text-align: center; line-height: 1.7; margin: 0 auto; max-width: 490px; font-size: 15px; }
-    .card { margin-top: 47px; border: 1px solid #ffffff17; border-radius: 18px; background: #1b1a20; box-shadow: 0 28px 70px #0005; overflow: hidden; }
-    .card-inner { padding: 30px; }
-    .card-heading { display: flex; align-items: flex-start; gap: 13px; margin-bottom: 25px; }
-    .icon-box { width: 42px; height: 42px; flex: none; display: grid; place-items: center; background: #cdb7ee19; border: 1px solid #cdb7ee25; color: #d7bff6; border-radius: 12px; }
-    .icon-box svg { width: 19px; }
-    h2 { font: 600 17px 'Space Grotesk', sans-serif; margin: 1px 0 5px; letter-spacing: -.02em; }
-    .sub { font-size: 13px; color: #928d98; margin: 0; }
-    label { display: block; color: #d2ced4; font-size: 12px; font-weight: 700; margin-bottom: 9px; }
-    .input-wrap { display: flex; align-items: center; background: #111115; border: 1px solid #39363e; border-radius: 10px; padding: 5px 5px 5px 15px; transition: border-color .2s; }
-    .input-wrap:focus-within { border-color: #bca0e2; }
-    .input-wrap svg { flex: none; width: 17px; color: #79737e; }
-    input { width: 100%; min-width: 0; height: 42px; border: 0; outline: 0; background: transparent; color: #f4f1f5; padding: 0 12px; font-size: 14px; }
-    input::placeholder { color: #6f6973; }
-    .paste { border: 0; background: #29272e; color: #c7c2cb; border-radius: 7px; padding: 9px 12px; font-size: 12px; font-weight: 600; }
-    .paste:hover { background: #37333e; }
-    .submit { width: 100%; min-height: 50px; margin-top: 14px; border: 0; border-radius: 10px; background: #d5c1ef; color: #21172c; font-weight: 700; font-size: 14px; display: flex; gap: 9px; align-items: center; justify-content: center; transition: background .2s, transform .2s; }
-    .submit:hover { background: #e4d4fa; transform: translateY(-1px); }
-    .submit:disabled { opacity: .65; cursor: wait; transform: none; }
-    .submit svg { width: 17px; }
-    details { margin-top: 16px; }
-    summary { color: #bbb3c2; font-size: 12px; font-weight: 600; cursor: pointer; width: fit-content; }
-    summary:hover { color: #e5d9f3; }
-    .password-field { margin-top: 14px; }
-    .password-field input { padding-left: 15px; }
-    .cooldown { color: #dfc89b; font-size: 12px; margin: 12px 0 0; }
-    .cooldown:empty { display: none; }
-    .result-note { color: #a6a0aa; font-size: 12px; line-height: 1.5; margin: 13px 0 0; }
-    .hint { margin: 15px 0 0; font-size: 12px; color: #817b86; line-height: 1.5; }
-    .hint strong { color: #b0a9b5; font-weight: 500; }
-    .result { border-top: 1px solid #ffffff12; padding: 24px 30px 28px; background: #17161b; }
-    .result[hidden], .message[hidden] { display: none; }
-    .result-title { display: flex; gap: 8px; align-items: center; color: #bce3bd; font-size: 12px; font-weight: 700; margin-bottom: 12px; }
-    .result-title svg { width: 16px; }
-    .result-row { display: flex; gap: 10px; align-items: stretch; }
-    .result-link { flex: 1; min-width: 0; padding: 13px; border: 1px solid #39363e; border-radius: 9px; background: #111115; color: #d2bddf; font-size: 13px; overflow-wrap: anywhere; line-height: 1.5; }
-    .copy { border: 1px solid #51475b; border-radius: 9px; background: #302a38; color: #eee5f5; padding: 0 16px; font-weight: 700; font-size: 12px; }
-    .copy:hover { background: #40364b; }
-    .message { margin: 14px 0 0; color: #f3aaa7; font-size: 13px; line-height: 1.5; }
-    .steps { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 35px; color: #8e8892; font-size: 12px; }
-    .steps b { color: #c8b3e2; font: 600 11px 'Space Grotesk', sans-serif; margin-right: 6px; }
-    .divider { width: 26px; height: 1px; background: #49414e; }
-    footer { border-top: 1px solid #ffffff12; padding: 24px 0; color: #77717c; font-size: 12px; display: flex; justify-content: space-between; gap: 20px; }
-    footer span:last-child { color: #a49caa; }
-    @media (max-width: 600px) { .shell { width: min(100% - 32px, 1120px); } header { height: 72px; } .top-note { font-size: 11px; } main { padding: 72px 0 80px; } .card { margin-top: 36px; } .card-inner, .result { padding: 22px; } .result-row { flex-direction: column; } .copy { min-height: 42px; } .steps { gap: 8px; font-size: 11px; } .divider { width: 12px; } footer { flex-direction: column; gap: 8px; } }
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
+    :root { color-scheme: dark; --ink:#f6f3fa; --muted:#aaa4b3; --dim:#77727f; --line:rgba(255,255,255,.1); --accent:#d2baf6; font-family:'DM Sans',sans-serif; background:#111014; color:var(--ink); }
+    * { box-sizing:border-box; }
+    [hidden] { display:none !important; }
+    html { min-height:100%; }
+    body { margin:0; min-height:100vh; background:radial-gradient(ellipse 55% 60% at 78% 20%,rgba(95,66,117,.22),transparent 74%),radial-gradient(ellipse 42% 55% at 8% 65%,rgba(53,40,68,.19),transparent 80%),#111014; }
+    body::before { content:''; position:fixed; inset:0; pointer-events:none; opacity:.13; background-image:linear-gradient(rgba(255,255,255,.026) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.026) 1px,transparent 1px); background-size:80px 80px; mask-image:linear-gradient(transparent,#000 35%,transparent); }
+    button,input { font:inherit; }
+    button { cursor:pointer; }
+    button:focus-visible,input:focus-visible,a:focus-visible,summary:focus-visible { outline:2px solid #d3b9fb; outline-offset:4px; }
+    .shell { position:relative; width:min(1240px,calc(100% - 80px)); margin:auto; }
+    header { height:94px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--line); }
+    .brand { display:flex; align-items:center; gap:12px; font:800 17px 'Manrope',sans-serif; letter-spacing:-.06em; }
+    .brand-mark { width:36px; height:36px; display:grid; place-items:center; border:1px solid #cab4e86b; border-radius:11px; color:#e3d5f7; background:linear-gradient(145deg,#4c3a5e,#251d2c); box-shadow:inset 0 1px 0 #ffffff20; }
+    .brand-mark svg { width:19px; }
+    .brand small { font:600 10px 'Manrope',sans-serif; letter-spacing:.15em; text-transform:uppercase; color:#aaa1b1; border-left:1px solid #ffffff25; padding-left:12px; margin-left:2px; }
+    .top-note { display:flex; align-items:center; gap:9px; font:700 10px 'Manrope',sans-serif; color:#c4b8cb; letter-spacing:.13em; text-transform:uppercase; }
+    .top-note svg { width:14px; color:#cdb2e8; }
+    main { padding:92px 0 66px; }
+    .hero { display:grid; grid-template-columns:minmax(0,1fr) minmax(430px,510px); gap:clamp(48px,8vw,120px); align-items:center; }
+    .hero-copy { max-width:610px; }
+    .eyebrow { display:flex; align-items:center; gap:11px; color:#cbb8dc; font:700 10px 'Manrope',sans-serif; letter-spacing:.18em; text-transform:uppercase; }
+    .eyebrow .spark { display:grid; place-items:center; width:25px; height:25px; border:1px solid #baa4d64d; border-radius:50%; color:#d9c5f1; font-size:13px; letter-spacing:0; }
+    h1 { margin:28px 0 23px; font:400 clamp(62px,6.2vw,92px)/.98 'DM Serif Display',Georgia,serif; letter-spacing:-.045em; }
+    h1 span { color:#d7c1ef; font-style:italic; }
+    .intro { color:#afa8b7; line-height:1.8; margin:0; max-width:420px; font-size:15px; }
+    .hero-rule { margin:43px 0 24px; width:100%; max-width:430px; height:1px; background:linear-gradient(90deg,#a98ac961,transparent); }
+    .hero-foot { display:flex; align-items:center; gap:12px; color:#9d95a4; font-size:12px; line-height:1.5; }
+    .hero-foot svg { width:17px; height:17px; color:#c7b1db; flex:none; }
+    .card-wrap { position:relative; }
+    .card-wrap::before { content:''; position:absolute; inset:-27px; border:1px solid rgba(214,187,245,.09); border-radius:31px; transform:rotate(2deg); pointer-events:none; }
+    .card { position:relative; border:1px solid #ffffff1e; border-radius:23px; background:linear-gradient(155deg,rgba(38,34,43,.98),rgba(25,23,29,.99) 62%); box-shadow:0 30px 80px #0007,inset 0 1px 0 #ffffff14; overflow:hidden; }
+    .card::before { content:''; position:absolute; top:0; left:12%; right:12%; height:1px; background:linear-gradient(90deg,transparent,#e7d3ff91,transparent); }
+    .card-inner { padding:34px; }
+    .card-top { display:flex; align-items:center; justify-content:space-between; gap:16px; padding-bottom:25px; margin-bottom:27px; border-bottom:1px solid #ffffff10; }
+    .card-kicker { font:700 10px 'Manrope',sans-serif; letter-spacing:.16em; color:#b5a8be; text-transform:uppercase; }
+    .card-index { color:#8e8099; font:600 11px 'Manrope',sans-serif; letter-spacing:.12em; }
+    .card-heading { display:flex; align-items:flex-start; gap:15px; margin-bottom:28px; }
+    .icon-box { width:46px; height:46px; flex:none; display:grid; place-items:center; background:linear-gradient(145deg,#59456d,#34283d); border:1px solid #d8b9f82e; color:#ead7ff; border-radius:14px; box-shadow:inset 0 1px 0 #ffffff16; }
+    .icon-box svg { width:20px; }
+    h2 { font:700 19px 'Manrope',sans-serif; margin:1px 0 6px; letter-spacing:-.05em; }
+    .sub { font-size:13px; color:#a69eac; margin:0; line-height:1.5; }
+    label { display:block; color:#ddd7e1; font:700 11px 'Manrope',sans-serif; margin-bottom:10px; }
+    .input-wrap { display:flex; align-items:center; background:#141318; border:1px solid #47414b; border-radius:11px; padding:5px 5px 5px 15px; transition:border-color .2s,box-shadow .2s; }
+    .input-wrap:focus-within { border-color:#c9a8e9; box-shadow:0 0 0 3px #c5a0e412; }
+    .input-wrap svg { flex:none; width:18px; color:#a398aa; }
+    input { width:100%; min-width:0; height:45px; border:0; outline:0; background:transparent; color:#f8f5fa; padding:0 11px; font-size:13px; }
+    input::placeholder { color:#8d8592; }
+    .paste { border:1px solid #ffffff0c; background:#2d2931; color:#e0d8e3; border-radius:8px; padding:10px 13px; font-size:12px; font-weight:700; }
+    .paste:hover { background:#3c3441; }
+    details { margin-top:18px; }
+    summary { display:flex; align-items:center; gap:8px; color:#c4bbc9; font-size:12px; font-weight:600; cursor:pointer; width:fit-content; list-style:none; }
+    summary::-webkit-details-marker { display:none; }
+    summary::before { content:'+'; display:grid; place-items:center; width:19px; height:19px; border:1px solid #77707b; border-radius:50%; color:#d9c4e8; font-size:15px; font-weight:400; }
+    details[open] summary::before { content:'−'; }
+    summary:hover { color:#fff; }
+    .password-field { margin-top:16px; }
+    .password-field input { padding-left:0; }
+    .submit { width:100%; min-height:55px; margin-top:23px; border:0; border-radius:11px; background:linear-gradient(100deg,#e2d0f4,#cdb1e9); color:#21182a; font:800 13px 'Manrope',sans-serif; display:flex; gap:10px; align-items:center; justify-content:center; box-shadow:0 7px 24px #b89ad023,inset 0 1px 0 #ffffff8a; transition:filter .2s,transform .2s; }
+    .submit:hover { filter:brightness(1.08); transform:translateY(-1px); }
+    .submit:disabled { opacity:.6; cursor:wait; transform:none; }
+    .submit svg { width:17px; }
+    .hint { color:#9c94a0; margin:18px 0 0; font-size:11px; line-height:1.65; }
+    .hint strong { color:#cec5d1; font-weight:600; }
+    .cooldown { color:#e3c999; font-size:12px; margin:13px 0 0; line-height:1.55; }
+    .cooldown:empty { display:none; }
+    .message { margin:16px 0 0; color:#ffc0bb; font-size:13px; line-height:1.5; }
+    .result { border-top:1px solid #ffffff12; padding:25px 34px 30px; background:#151419; }
+    .result-title { display:flex; gap:8px; align-items:center; color:#bce3bd; font-size:12px; font-weight:700; margin-bottom:12px; }
+    .result-title svg { width:16px; }
+    .result-row { display:flex; gap:10px; align-items:stretch; }
+    .result-link { flex:1; min-width:0; padding:13px; border:1px solid #49414d; border-radius:9px; background:#111115; color:#e1c9f5; font-size:13px; overflow-wrap:anywhere; line-height:1.5; }
+    .copy { border:1px solid #67526e; border-radius:9px; background:#302a38; color:#f3eaf8; padding:0 16px; font-weight:700; font-size:12px; }
+    .copy:hover { background:#44384b; }
+    .result-note { color:#aaa2ad; font-size:12px; line-height:1.5; margin:13px 0 0; }
+    .steps { display:grid; grid-template-columns:repeat(3,1fr); margin-top:110px; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+    .step { display:flex; align-items:center; gap:15px; padding:25px 0; }
+    .step + .step { border-left:1px solid var(--line); padding-left:32px; }
+    .step-number { color:#bb9bd5; font:400 italic 24px 'DM Serif Display',Georgia,serif; }
+    .step-title { display:block; font:700 12px 'Manrope',sans-serif; color:#e5dfe8; }
+    .step-text { display:block; margin-top:4px; color:#958c9a; font-size:11px; }
+    footer { padding:25px 0 30px; color:#8e8692; font-size:11px; display:flex; justify-content:space-between; gap:20px; }
+    footer strong { font-family:'Manrope',sans-serif; color:#c7bdca; font-weight:700; }
+    @media (max-width:900px) { .shell { width:min(100% - 48px,700px); } main { padding:76px 0 48px; } .hero { grid-template-columns:1fr; gap:65px; } .hero-copy { max-width:580px; } h1 { font-size:clamp(57px,10vw,82px); } .card-wrap { max-width:620px; width:100%; } .steps { margin-top:80px; } }
+    @media (max-width:600px) { .shell { width:calc(100% - 36px); } header { height:76px; } .brand small { display:none; } .top-note { font-size:9px; letter-spacing:.08em; } main { padding:46px 0 40px; } .hero { gap:38px; } h1 { font-size:clamp(47px,12vw,64px); margin:20px 0 16px; } .intro { font-size:14px; } .hero-rule, .hero-foot { display:none; } .card-wrap::before { inset:-11px; border-radius:26px; transform:rotate(1.5deg); } .card-inner { padding:25px 21px; } .card-top { padding-bottom:20px; margin-bottom:23px; } .card-heading { margin-bottom:24px; } h2 { font-size:17px; } .result { padding:22px 21px; } .result-row { flex-direction:column; } .copy { min-height:44px; } .steps { margin-top:65px; grid-template-columns:1fr; } .step { padding:16px 0; } .step + .step { border-left:0; border-top:1px solid var(--line); padding-left:0; } footer { flex-direction:column; gap:9px; } }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { transition:none !important; scroll-behavior:auto !important; } }
   </style>
 </head>
 <body>
   <div class="shell">
     <header>
-      <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"/><path d="M14 11a5 5 0 0 0-7.1 0l-2 2a5 5 0 0 0 7.1 7.1l1.1-1.1"/></svg></span> rootz link</div>
-      <div class="top-note"><span class="dot"></span> Herramienta de enlaces</div>
+      <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"/><path d="M14 11a5 5 0 0 0-7.1 0l-2 2a5 5 0 0 0 7.1 7.1l1.1-1.1"/></svg></span> rootz link <small>Link studio</small></div>
+      <div class="top-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 2v20M2 12h20M5 5l14 14M19 5 5 19"/></svg> Hecho para Rootz</div>
     </header>
     <main>
-      <div class="eyebrow">Simple y directo</div>
-      <h1>Tu enlace, <span>sin rodeos.</span></h1>
-      <p class="intro">Pega un enlace de Rootz y obtén el enlace directo de descarga listo para copiar.</p>
-      <section class="card" aria-labelledby="card-title">
-        <div class="card-inner">
-          <div class="card-heading"><div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-4-4 4 4 4-4"/><path d="M5 17v3h14v-3"/></svg></div><div><h2 id="card-title">Obtener enlace directo</h2><p class="sub">Solo necesitas el enlace de tu archivo.</p></div></div>
-          <form id="form" novalidate>
-            <label for="url">Enlace de Rootz</label>
-            <div class="input-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1 1"/><path d="M14 11a5 5 0 0 0-7.1 0l-2 2a5 5 0 0 0 7.1 7.1l1-1"/></svg><input id="url" type="url" inputmode="url" placeholder="https://www.rootz.so/d/..." autocomplete="url" required><button class="paste" id="paste" type="button">Pegar</button></div>
-            <details><summary>¿El archivo tiene contraseña?</summary><div class="password-field"><label for="password">Contraseña del archivo</label><div class="input-wrap"><input id="password" type="password" autocomplete="off" maxlength="1024" placeholder="Escribe la contraseña"></div></div></details>
-            <button class="submit" id="submit" type="submit"><span>Obtener enlace</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
-            <p class="cooldown" id="cooldown" aria-live="off"></p>
-            <p class="hint"><strong>Ejemplo:</strong> https://www.rootz.so/d/aXcg4<br>La consulta puede contar como una descarga en Rootz.</p>
-            <p class="message" id="message" role="alert" hidden></p>
-          </form>
+      <div class="hero">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="spark" aria-hidden="true">✳</span> Una forma más simple de compartir</div>
+          <h1>El enlace, en su forma <span>más directa.</span></h1>
+          <p class="intro">Convierte tu enlace de Rootz en un enlace directo de descarga. Pégalo, obtén el resultado y compártelo en un instante.</p>
+          <div class="hero-rule"></div>
+          <div class="hero-foot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg> Tu archivo está a un enlace de distancia.</div>
         </div>
-        <div class="result" id="result" hidden><div class="result-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg> Enlace directo listo</div><div class="result-row"><a class="result-link" id="result-link" target="_blank" rel="noopener noreferrer"></a><button class="copy" id="copy" type="button">Copiar enlace</button></div><p class="result-note"><span id="result-source">El enlace directo puede caducar.</span> <span id="copy-status" role="status"></span></p></div>
+        <div class="card-wrap">
+          <section class="card" aria-labelledby="card-title">
+            <div class="card-inner">
+              <div class="card-top"><span class="card-kicker">Tu espacio de enlaces</span><span class="card-index">01 / 01</span></div>
+              <div class="card-heading"><div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-4-4 4 4 4-4"/><path d="M5 17v3h14v-3"/></svg></div><div><h2 id="card-title">Obtener enlace directo</h2><p class="sub">Todo comienza con tu enlace de Rootz.</p></div></div>
+              <form id="form" novalidate>
+                <label for="url">ENLACE DE ROOTZ</label>
+                <div class="input-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1 1"/><path d="M14 11a5 5 0 0 0-7.1 0l-2 2a5 5 0 0 0 7.1 7.1l1-1"/></svg><input id="url" type="url" inputmode="url" placeholder="https://www.rootz.so/d/..." autocomplete="url" required><button class="paste" id="paste" type="button">Pegar</button></div>
+                <details><summary>El archivo tiene contraseña</summary><div class="password-field"><label for="password">Contraseña del archivo</label><div class="input-wrap"><input id="password" type="password" autocomplete="off" maxlength="1024" placeholder="Escribe la contraseña"></div></div></details>
+                <button class="submit" id="submit" type="submit"><span>Obtener enlace directo</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
+                <p class="cooldown" id="cooldown" aria-live="off"></p>
+                <p class="hint"><strong>Ejemplo:</strong> https://www.rootz.so/d/aXcg4<br>La consulta puede contar como una descarga en Rootz.</p>
+                <p class="message" id="message" role="alert" hidden></p>
+              </form>
+            </div>
+            <div class="result" id="result" hidden aria-live="polite"><div class="result-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg> Enlace directo listo</div><div class="result-row"><a class="result-link" id="result-link" target="_blank" rel="noopener noreferrer"></a><button class="copy" id="copy" type="button">Copiar enlace</button></div><p class="result-note"><span id="result-source">El enlace directo puede caducar.</span> <span id="copy-status" role="status"></span></p></div>
+          </section>
+        </div>
+      </div>
+      <section class="steps" aria-label="Cómo funciona">
+        <div class="step"><span class="step-number">01</span><span><span class="step-title">Pega tu enlace</span><span class="step-text">Añade la dirección de Rootz.</span></span></div>
+        <div class="step"><span class="step-number">02</span><span><span class="step-title">Obtén el resultado</span><span class="step-text">Buscamos el enlace directo.</span></span></div>
+        <div class="step"><span class="step-number">03</span><span><span class="step-title">Listo para compartir</span><span class="step-text">Copia y utiliza tu enlace.</span></span></div>
       </section>
-      <div class="steps" aria-label="Pasos"><span><b>01</b> Pega el enlace</span><span class="divider"></span><span><b>02</b> Obtén el enlace</span><span class="divider"></span><span><b>03</b> Copia y comparte</span></div>
     </main>
-    <footer><span>rootz link &nbsp; / &nbsp; Una herramienta sencilla para tus archivos.</span><span>Hecho para compartir mejor ↗</span></footer>
+    <footer><span><strong>rootz link</strong> &nbsp; / &nbsp; Enlaces que llegan más lejos.</span><span>Diseñado para hacer las cosas simples &nbsp; ↗</span></footer>
   </div>
   <script>
     const form = document.querySelector('#form');
@@ -159,7 +194,7 @@
     function updateButton() {
       const remaining = Math.max(0, Math.ceil((retryAt - Date.now()) / 1000));
       button.disabled = busy || (remaining > 0 && !cachedLink(input.value));
-      button.querySelector('span').textContent = busy ? 'Buscando enlace...' : 'Obtener enlace';
+      button.querySelector('span').textContent = busy ? 'Buscando enlace...' : 'Obtener enlace directo';
       cooldown.textContent = remaining ? `Rootz permite nuevas consultas en ${remaining} s. Los enlaces recientes de esta pestaña se pueden reutilizar.` : '';
       if (!remaining && timer) { clearInterval(timer); timer = null; }
     }
