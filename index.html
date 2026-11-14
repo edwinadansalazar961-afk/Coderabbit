@@ -101,14 +101,14 @@
   <div class="shell">
     <header>
       <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"/><path d="M14 11a5 5 0 0 0-7.1 0l-2 2a5 5 0 0 0 7.1 7.1l1.1-1.1"/></svg></span> link studio <small>Enlaces directos</small></div>
-      <div class="top-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 2v20M2 12h20M5 5l14 14M19 5 5 19"/></svg> Rootz + AkiraBox</div>
+      <div class="top-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 2v20M2 12h20M5 5l14 14M19 5 5 19"/></svg> Rootz · AkiraBox · 1fichier</div>
     </header>
     <main>
       <div class="hero">
         <div class="hero-copy">
           <div class="eyebrow"><span class="spark" aria-hidden="true">✳</span> Una forma más simple de compartir</div>
           <h1>El enlace, en su forma <span>más directa.</span></h1>
-          <p class="intro">Convierte tu enlace de Rootz o AkiraBox en un enlace directo de descarga. Pégalo, obtén el resultado y compártelo en un instante.</p>
+          <p class="intro">Convierte tu enlace de Rootz, AkiraBox o 1fichier en un enlace directo de descarga. Pégalo, obtén el resultado y compártelo en un instante.</p>
           <div class="hero-rule"></div>
           <div class="hero-foot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg> Tu archivo está a un enlace de distancia.</div>
         </div>
@@ -116,15 +116,20 @@
           <section class="card" aria-labelledby="card-title">
             <div class="card-inner">
               <div class="card-top"><span class="card-kicker">Tu espacio de enlaces</span><span class="card-index">01 / 01</span></div>
-              <div class="card-heading"><div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-4-4 4 4 4-4"/><path d="M5 17v3h14v-3"/></svg></div><div><h2 id="card-title">Obtener enlace directo</h2><p class="sub">Pega tu enlace de Rootz o AkiraBox.</p></div></div>
+              <div class="card-heading"><div class="icon-box" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m-4-4 4 4 4-4"/><path d="M5 17v3h14v-3"/></svg></div><div><h2 id="card-title">Obtener enlace directo</h2><p class="sub">Pega tu enlace de Rootz, AkiraBox o 1fichier.</p></div></div>
               <form id="form" novalidate>
-                <label for="url">ENLACE DE ROOTZ O AKIRABOX</label>
-                <div class="input-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1 1"/><path d="M14 11a5 5 0 0 0-7.1 0l-2 2a5 5 0 0 0 7.1 7.1l1-1"/></svg><input id="url" type="url" inputmode="url" placeholder="https://rootz.so/d/... o akirabox.to/.../file" autocomplete="url" required><button class="paste" id="paste" type="button">Pegar</button></div>
-                <details><summary>El archivo de Rootz tiene contraseña</summary><div class="password-field"><label for="password">Contraseña del archivo</label><div class="input-wrap"><input id="password" type="password" autocomplete="off" maxlength="1024" placeholder="Escribe la contraseña"></div></div></details>
+                <label for="url">ENLACE DEL ARCHIVO</label>
+                <div class="input-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1 1"/><path d="M14 11a5 5 0 0 0-7.1 0l-2 2a5 5 0 0 0 7.1 7.1l1-1"/></svg><input id="url" type="url" inputmode="url" placeholder="Pega aquí el enlace de tu archivo" autocomplete="url" required><button class="paste" id="paste" type="button">Pegar</button></div>
+                <details id="rootz-options"><summary>El archivo de Rootz tiene contraseña</summary><div class="password-field"><label for="password">Contraseña del archivo</label><div class="input-wrap"><input id="password" type="password" autocomplete="off" maxlength="1024" placeholder="Escribe la contraseña"></div></div></details>
+                <div id="fichier-options" hidden>
+                  <div class="password-field"><label for="fichier-key">Clave API de 1fichier</label><div class="input-wrap"><input id="fichier-key" type="password" autocomplete="off" maxlength="2048" placeholder="Introduce tu clave API"></div></div>
+                  <p class="hint">Requiere una cuenta compatible. La clave se envía al servidor para consultar 1fichier.</p>
+                  <details><summary>El archivo tiene contraseña</summary><div class="password-field"><label for="fichier-password">Contraseña del archivo</label><div class="input-wrap"><input id="fichier-password" type="password" autocomplete="off" maxlength="1024" placeholder="Escribe la contraseña"></div></div></details>
+                </div>
                 <button class="submit" id="submit" type="submit"><span>Obtener enlace directo</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
                 <p class="cooldown" id="cooldown" aria-live="off"></p>
-                <p class="hint"><strong>Formatos:</strong> rootz.so/d/... · akirabox.to/.../file<br>La consulta puede contar como una descarga.</p>
-                <p class="message" id="message" role="alert" hidden></p><div class="verification" id="verification" hidden>En AkiraBox, completa la verificación y copia la dirección del botón de descarga.<br><a id="verification-link" target="_blank" rel="noopener noreferrer">Abrir AkiraBox ↗</a></div>
+                <p class="hint"><strong>Formatos:</strong> rootz.so/d/... · akirabox.to/.../file · 1fichier.com/?...<br>La consulta puede contar como una descarga.</p>
+                <p class="message" id="message" role="alert" hidden></p><div class="verification" id="verification" hidden><span id="verification-help">En AkiraBox, completa la verificación y copia la dirección del botón de descarga.</span><br><a id="verification-link" target="_blank" rel="noopener noreferrer">Abrir AkiraBox ↗</a></div>
               </form>
             </div>
             <div class="result" id="result" hidden aria-live="polite"><div class="result-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg> Enlace directo listo</div><div class="result-row"><a class="result-link" id="result-link" target="_blank" rel="noopener noreferrer"></a><button class="copy" id="copy" type="button">Copiar enlace</button></div><p class="result-note"><span id="result-source">El enlace directo puede caducar.</span> <span id="copy-status" role="status"></span></p></div>
@@ -153,6 +158,19 @@
     const resultSource = document.querySelector('#result-source');
     const verification = document.querySelector('#verification');
     const verificationLink = document.querySelector('#verification-link');
+    const verificationHelp = document.querySelector('#verification-help');
+    const fichierOptions = document.querySelector('#fichier-options');
+    const rootzOptions = document.querySelector('#rootz-options');
+    const fichierKey = document.querySelector('#fichier-key');
+    const fichierPassword = document.querySelector('#fichier-password');
+    function isFichier(value) {
+      try { const u = new URL(value.trim()); return u.protocol === 'https:' && ['1fichier.com', 'www.1fichier.com'].includes(u.hostname); }
+      catch { return false; }
+    }
+    function updateProviderFields() {
+      const fichier = isFichier(input.value);
+      fichierOptions.hidden = !fichier; rootzOptions.hidden = fichier;
+    }
     // Keep public, unsigned links only in this tab and only briefly.
     const linkCache = new Map();
     const cacheLifetime = 120000;
@@ -192,9 +210,11 @@
     let retryAt = 0;
     let timer;
     function showError(text) { message.textContent = text; message.hidden = false; }
-    function invalidate() { revision++; result.hidden = true; message.hidden = true; verification.hidden = true; copyStatus.textContent = ''; updateButton(); }
+    function invalidate() { revision++; result.hidden = true; message.hidden = true; verification.hidden = true; copyStatus.textContent = ''; updateProviderFields(); updateButton(); }
     input.addEventListener('input', invalidate);
     password.addEventListener('input', invalidate);
+    fichierKey.addEventListener('input', invalidate);
+    fichierPassword.addEventListener('input', invalidate);
     function updateButton() {
       const remaining = Math.max(0, Math.ceil((retryAt - Date.now()) / 1000));
       button.disabled = busy || (remaining > 0 && !!cacheKey(input.value) && !cachedLink(input.value));
@@ -219,10 +239,12 @@
       const cached = cachedLink(input.value);
       if (cached) { showResult(cached, true); return; }
       if (Date.now() < retryAt && cacheKey(input.value)) return;
-      if (!input.value.trim()) { showError('Pega un enlace de Rootz o AkiraBox para continuar.'); input.focus(); return; }
+      if (!input.value.trim()) { showError('Pega un enlace de Rootz, AkiraBox o 1fichier para continuar.'); input.focus(); return; }
       const submittedRevision = revision;
       const submittedUrl = input.value.trim();
-      const submittedPassword = password.value;
+      const fichier = isFichier(submittedUrl);
+      const submittedPassword = fichier ? fichierPassword.value : password.value;
+      const submittedKey = fichier ? fichierKey.value : '';
       busy = true; updateButton();
       try {
         const apiBase = document.querySelector('meta[name="rootz-api-base"]').content.trim();
@@ -233,16 +255,21 @@
           if (base.protocol !== 'https:' || base.username || base.password) throw new Error('La dirección del servidor no es válida.');
           endpoint = new URL('/api/resolve', base).href;
         }
-        const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: submittedUrl, password: submittedPassword }) });
+        if (submittedKey && !window.isSecureContext) throw new Error('Usa HTTPS para enviar tu clave API de forma segura.');
+        const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: submittedUrl, password: submittedPassword, ...(fichier ? { apiKey: submittedKey } : {}) }) });
         const data = await response.json();
         if (response.status === 429 && Number.isFinite(data.retryAfter) && data.retryAfter > 0) startCooldown(data.retryAfter);
         if (revision !== submittedRevision) return;
         if (!response.ok || !data.url) {
-          if (response.status === 403 && typeof data.verificationUrl === 'string') {
+          if ((response.status === 403 || response.status === 401) && typeof data.verificationUrl === 'string') {
             try {
               const target = new URL(data.verificationUrl);
               if (target.origin === 'https://akirabox.to' && /^\/[a-zA-Z0-9_-]{1,100}\/file$/.test(target.pathname)) {
-                verificationLink.href = target.href; verification.hidden = false;
+                verificationLink.href = target.href; verificationLink.textContent = 'Abrir AkiraBox ↗';
+                verificationHelp.textContent = 'En AkiraBox, completa la verificación y copia la dirección del botón de descarga.'; verification.hidden = false;
+              } else if (target.origin === 'https://1fichier.com' && target.pathname === '/' && /^\?[a-z0-9]{5,20}$/.test(target.search)) {
+                verificationLink.href = target.href; verificationLink.textContent = 'Abrir 1fichier ↗';
+                verificationHelp.textContent = 'También puedes abrir el archivo en 1fichier y seguir sus pasos de descarga.'; verification.hidden = false;
               }
             } catch { /* Ignore invalid verification links. */ }
           }

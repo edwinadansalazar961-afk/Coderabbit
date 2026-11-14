@@ -1,6 +1,6 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { shortIdFromUrl, akiraIdFromUrl, resolveLink, resolveAkira, createServer } = require('./server');
+const { shortIdFromUrl, akiraIdFromUrl, fichierIdFromUrl, resolveLink, resolveAkira, resolveFichier, createServer } = require('./server');
 
 test('accepts Rootz download links and rejects other hosts and paths', () => {
   assert.equal(shortIdFromUrl(' https://www.rootz.so/d/aXcg4?ref=share '), 'aXcg4');
@@ -189,4 +189,53 @@ test('HTTP endpoint routes AkiraBox requests and preserves verification informat
   const response = await fetch(`http://127.0.0.1:${server.address().port}/api/resolve`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: 'https://akirabox.to/example/file' }) });
   assert.equal(response.status, 403);
   assert.equal((await response.json()).verificationUrl, 'https://akirabox.to/example/file');
+});
+
+
+test('validates 1fichier file links and rejects untrusted origins', () => {
+  assert.equal(fichierIdFromUrl('https://1fichier.com/?abc123xyz'), 'abc123xyz');
+  assert.equal(fichierIdFromUrl('https://www.1fichier.com/?abc123xyz&af=123'), 'abc123xyz');
+  for (const url of ['https://1fichier.com.evil.test/?abc123', 'http://1fichier.com/?abc123', 'https://user@1fichier.com/?abc123', 'https://1fichier.com:444/?abc123', 'https://1fichier.com/api?abc123', 'https://1fichier.com/?ABC123', 'https://1fichier.com/?x']) assert.equal(fichierIdFromUrl(url), null);
+});
+
+test('requests an official 1fichier download with a per-request API key', async () => {
+  let call;
+  const result = await resolveFichier('https://1fichier.com/?abc123xyz&af=123', async (url, options) => {
+    call = { url, options };
+    return Response.json({ status: 'OK', url: 'https://a-01.1fichier.com/c123456' });
+  }, 'synthetic-key', 'file-password');
+  assert.equal(call.url, 'https://api.1fichier.com/v1/download/get_token.cgi');
+  assert.equal(call.options.headers.Authorization, 'Bearer synthetic-key');
+  assert.equal(call.options.redirect, 'manual');
+  assert.deepEqual(JSON.parse(call.options.body), { url: 'https://1fichier.com/?abc123xyz', pass: 'file-password' });
+  assert.deepEqual(result, { status: 200, url: 'https://a-01.1fichier.com/c123456' });
+  assert.ok(!JSON.stringify(result).includes('synthetic-key'));
+});
+
+test('reports missing credentials and rejects errors and unsafe download URLs', async () => {
+  const url = 'https://1fichier.com/?abc123xyz';
+  let called = false;
+  const missing = await resolveFichier(url, async () => { called = true; });
+  assert.equal(missing.status, 401);
+  assert.equal(missing.verificationUrl, url);
+  assert.equal(called, false);
+  assert.equal((await resolveFichier(url, async () => Response.json({ status: 'KO' }), 'key')).status, 502);
+  assert.equal((await resolveFichier(url, async () => Response.json({ status: 'OK', url: 'https://evil.test/c123' }), 'key')).status, 502);
+  assert.equal((await resolveFichier(url, async () => Response.json({ status: 'OK', url: 'http://a-01.1fichier.com/c123' }), 'key')).status, 502);
+  assert.equal((await resolveFichier(url, async () => Response.json({ status: 'OK', url }), 'key')).status, 502);
+  assert.equal((await resolveFichier(url, async () => Response.json({}), 'bad\r\nkey')).status, 400);
+  assert.equal((await resolveFichier(url, async () => new Response('Forbidden', { status: 403 }), 'key')).status, 401);
+  assert.equal((await resolveFichier(url, async () => new Response('Too many requests', { status: 429 }), 'key')).status, 429);
+});
+
+test('HTTP endpoint routes 1fichier with credentials without exposing them', async t => {
+  const server = createServer(async (url, options) => {
+    assert.equal(options.headers.Authorization, 'Bearer test-key');
+    return Response.json({ status: 'OK', url: 'https://a-01.1fichier.com/c123' });
+  });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  t.after(() => server.close());
+  const endpoint = `http://127.0.0.1:${server.address().port}/api/resolve`;
+  const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: 'https://1fichier.com/?abc123', apiKey: 'test-key' }) });
+  assert.deepEqual(await response.json(), { url: 'https://a-01.1fichier.com/c123' });
 });

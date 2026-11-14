@@ -79,7 +79,7 @@ async function publicMetadataLink(id, fetcher, headers) {
 
 async function resolveLink(value, fetcher = fetch, password = '') {
   const id = shortIdFromUrl(value);
-  if (!id) return { status: 400, error: 'Introduce un enlace válido de Rootz o AkiraBox.' };
+  if (!id) return { status: 400, error: 'Introduce un enlace válido de Rootz, AkiraBox o 1fichier.' };
   if (typeof password !== 'string' || password.length > 1024) return { status: 400, error: 'La contraseña no es válida.' };
 
   try {
@@ -168,6 +168,52 @@ async function resolveAkira(value, fetcher = fetch, password = '') {
   }
 }
 
+const fichierDomains = ['1fichier.com', 'alterupload.com', 'cjoint.net', 'desfichiers.com', 'dfichiers.com', 'megadl.fr', 'mesfichiers.org', 'piecejointe.net', 'pjointe.com', 'tenvoi.com', 'dl4free.com'];
+
+function fichierIdFromUrl(value) {
+  if (typeof value !== 'string' || value.length > 2048) return null;
+  try {
+    const url = new URL(value.trim());
+    if (url.protocol !== 'https:' || !['1fichier.com', 'www.1fichier.com'].includes(url.hostname) || url.port || url.username || url.password || url.pathname !== '/') return null;
+    const id = url.search.slice(1).split('&')[0];
+    return /^[a-z0-9]{5,20}$/.test(id) ? id : null;
+  } catch { return null; }
+}
+
+async function resolveFichier(value, fetcher = fetch, apiKey = '', password = '') {
+  const id = fichierIdFromUrl(value);
+  if (!id) return { status: 400, error: 'Introduce un enlace válido de 1fichier.' };
+  if (typeof apiKey !== 'string' || apiKey.length > 2048 || /[\r\n]/.test(apiKey)) return { status: 400, error: 'La clave API no es válida.' };
+  if (typeof password !== 'string' || password.length > 1024) return { status: 400, error: 'La contraseña no es válida.' };
+  const source = `https://1fichier.com/?${id}`;
+  if (!apiKey.trim()) return { status: 401, error: '1fichier requiere una clave API de una cuenta compatible para generar el enlace.', verificationUrl: source };
+  try {
+    const payload = { url: source };
+    if (password) payload.pass = password;
+    const response = await fetcher('https://api.1fichier.com/v1/download/get_token.cgi', {
+      method: 'POST', redirect: 'manual', signal: AbortSignal.timeout(15000),
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json', Authorization: `Bearer ${apiKey.trim()}` },
+      body: JSON.stringify(payload)
+    });
+    if (response.status === 401 || response.status === 403 || response.status === 429) {
+      if (response.body) await response.body.cancel().catch(() => {});
+      return response.status === 429
+        ? { status: 429, error: '1fichier ha limitado las solicitudes. Inténtalo de nuevo más tarde.' }
+        : { status: 401, error: '1fichier rechazó la clave API o la cuenta.' };
+    }
+    const body = await readBoundedText(response, 128 * 1024, false);
+    let data;
+    try { data = JSON.parse(body); } catch { return { status: 502, error: '1fichier no devolvió una respuesta válida.' }; }
+    if (!response.ok || data?.status !== 'OK' || typeof data.url !== 'string') return { status: 502, error: '1fichier no pudo generar el enlace. Comprueba el archivo, la contraseña y tu cuenta.' };
+    const direct = new URL(data.url);
+    const allowed = fichierDomains.some(domain => direct.hostname === domain || direct.hostname.endsWith(`.${domain}`));
+    if (direct.protocol !== 'https:' || direct.username || direct.password || direct.port || !allowed || direct.hostname === 'api.1fichier.com' || direct.pathname === '/') return { status: 502, error: '1fichier no devolvió un enlace directo válido.' };
+    return { status: 200, url: direct.href };
+  } catch {
+    return { status: 502, error: 'No se pudo conectar con 1fichier. Inténtalo de nuevo más tarde.' };
+  }
+}
+
 function createServer(fetcher = fetch, allowedOrigin = process.env.ALLOWED_ORIGIN || '') {
   return http.createServer(async (req, res) => {
     const origin = req.headers.origin;
@@ -196,13 +242,15 @@ function createServer(fetcher = fetch, allowedOrigin = process.env.ALLOWED_ORIGI
     let body = '';
     for await (const chunk of req) {
       body += chunk;
-      if (body.length > 4096) return sendJson(413, { error: 'La solicitud es demasiado grande.' });
+      if (body.length > 8192) return sendJson(413, { error: 'La solicitud es demasiado grande.' });
     }
     let input;
     try { input = JSON.parse(body); } catch { return sendJson(400, { error: 'Solicitud inválida.' }); }
-    const result = akiraIdFromUrl(input?.url)
-      ? await resolveAkira(input.url, fetcher, input?.password ?? '')
-      : await resolveLink(input?.url, fetcher, input?.password ?? '');
+    const result = fichierIdFromUrl(input?.url)
+      ? await resolveFichier(input.url, fetcher, input?.apiKey ?? '', input?.password ?? '')
+      : akiraIdFromUrl(input?.url)
+        ? await resolveAkira(input.url, fetcher, input?.password ?? '')
+        : await resolveLink(input?.url, fetcher, input?.password ?? '');
     return sendJson(result.status, result.url ? { url: result.url } : { error: result.error, ...(result.retryAfter ? { retryAfter: result.retryAfter } : {}), ...(result.verificationUrl ? { verificationUrl: result.verificationUrl } : {}) });
   });
 }
@@ -211,4 +259,4 @@ if (require.main === module) {
   const port = Number(process.env.PORT) || 4173;
   createServer().listen(port, '0.0.0.0', () => console.log(`Rootz Link listo en http://localhost:${port}`));
 }
-module.exports = { shortIdFromUrl, akiraIdFromUrl, resolveLink, resolveAkira, createServer };
+module.exports = { shortIdFromUrl, akiraIdFromUrl, fichierIdFromUrl, resolveLink, resolveAkira, resolveFichier, createServer };

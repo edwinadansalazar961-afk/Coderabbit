@@ -36,7 +36,19 @@ GitHub Pages solo aloja la interfaz estática. El servidor Node debe estar dispo
 
 El servidor permite peticiones desde `https://edwinadansalazar961-afk.github.io` mediante la variable `ALLOWED_ORIGIN`. Si publicas en otro dominio, actualiza esa variable con el origen HTTPS exacto. La URL del servidor debe ser HTTPS para proteger las contraseñas.
 
+<!-- coderabbit-ai-generated:v1 -->
+
+<!-- coderabbit-ai-generated-section:v1:371f04231cc37fd52f2ba40be7814effe7dbb95f0cc1acf95283a0944c7a1cba -->
+
+## 1fichier
+
+Para generar enlaces de 1fichier, introduce en la página una clave API de una cuenta compatible (Premium, Premium Light, Premium GOLD, Access o CDN). La clave se envía al servidor de la aplicación y de ahí a la API oficial de 1fichier; úsala solo a través de HTTPS y con un servidor de confianza. Se procesa para esa solicitud y no se guarda. Si el archivo tiene contraseña, introdúcela en el campo opcional. La API indica que el enlace generado es temporal y normalmente tiene una validez de cinco minutos.
+
+1fichier puede rechazar solicitudes desde servidores o requerir créditos CDN; sin una clave compatible se puede abrir el archivo en 1fichier para seguir su flujo de descarga.
+
 ## Limitaciones
+
+<!-- /coderabbit-ai-generated:v1 -->
 
 <!-- /coderabbit-ai-generated:v1 -->
 
