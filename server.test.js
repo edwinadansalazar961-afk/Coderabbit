@@ -239,3 +239,15 @@ test('HTTP endpoint routes 1fichier with credentials without exposing them', asy
   const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: 'https://1fichier.com/?abc123', apiKey: 'test-key' }) });
   assert.deepEqual(await response.json(), { url: 'https://a-01.1fichier.com/c123' });
 });
+
+
+test('distinguishes 1fichier authentication and access errors without exposing secrets', async () => {
+  const url = 'https://1fichier.com/?abc123xyz';
+  const secret = 'synthetic-secret-key';
+  for (const [status, expected] of [[401, /HTTP 401/], [403, /HTTP 403/]]) {
+    const result = await resolveFichier(url, async () => new Response(secret, { status }), secret);
+    assert.equal(result.status, 401);
+    assert.match(result.error, expected);
+    assert.ok(!JSON.stringify(result).includes(secret));
+  }
+});

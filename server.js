@@ -198,9 +198,9 @@ async function resolveFichier(value, fetcher = fetch, apiKey = '', password = ''
     });
     if (response.status === 401 || response.status === 403 || response.status === 429) {
       if (response.body) await response.body.cancel().catch(() => {});
-      return response.status === 429
-        ? { status: 429, error: '1fichier ha limitado las solicitudes. Inténtalo de nuevo más tarde.' }
-        : { status: 401, error: '1fichier rechazó la clave API o la cuenta.' };
+      if (response.status === 429) return { status: 429, error: '1fichier ha limitado las solicitudes. Inténtalo de nuevo más tarde.' };
+      if (response.status === 401) return { status: 401, error: '1fichier no autorizó la solicitud (HTTP 401). Comprueba la clave API de 1fichier; es distinta de la clave del servicio propio.' };
+      return { status: 401, error: '1fichier denegó la solicitud (HTTP 403). Comprueba tu plan, las restricciones de la cuenta y los créditos CDN.' };
     }
     const body = await readBoundedText(response, 128 * 1024, false);
     let data;
