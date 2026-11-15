@@ -1,6 +1,7 @@
 const http = require('node:http');
 const fs = require('node:fs');
 const path = require('node:path');
+const { createDebrid, allowedDownloadUrl } = require('./debrid');
 
 const html = fs.readFileSync(path.join(__dirname, 'index.html'));
 
@@ -214,25 +215,69 @@ async function resolveFichier(value, fetcher = fetch, apiKey = '', password = ''
   }
 }
 
-function createServer(fetcher = fetch, allowedOrigin = process.env.ALLOWED_ORIGIN || '') {
-  return http.createServer(async (req, res) => {
+function createServer(fetcher = fetch, allowedOrigin = process.env.ALLOWED_ORIGIN || '', debrid = null) {
+  async function handle(req, res) {
     const origin = req.headers.origin;
     res.setHeader('Vary', 'Origin');
     if (origin && origin === allowedOrigin) {
       res.setHeader('Access-Control-Allow-Origin', origin);
     }
-    if (req.method === 'OPTIONS' && req.url === '/api/resolve') {
+    if (req.method === 'OPTIONS' && (req.url === '/api/resolve' || req.url === '/api/debrid/jobs' || /^\/api\/debrid\/jobs\/[a-f0-9]{64}$/.test(req.url))) {
       if (!origin || origin !== allowedOrigin) {
         res.writeHead(403);
         return res.end();
       }
-      res.writeHead(204, { 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type', 'Access-Control-Max-Age': '600' });
+      res.writeHead(204, { 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': req.url === '/api/resolve' ? 'Content-Type' : 'Content-Type, Authorization', 'Access-Control-Max-Age': '600' });
       return res.end();
     }
     const sendJson = (status, data) => {
       res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' });
       res.end(JSON.stringify(data));
     };
+    if (req.url === '/api/debrid/status' && req.method === 'GET') return sendJson(200, { enabled: !!debrid });
+    if (req.url.startsWith('/api/debrid/')) {
+      if (!debrid) return sendJson(503, { error: 'El servicio propio aún no está configurado.' });
+      const download = req.url.match(/^\/api\/debrid\/files\/([a-f0-9]{64})$/);
+      if (download && req.method === 'GET') {
+        const job = await debrid.get(download[1]);
+        if (!job || job.state !== 'ready') return sendJson(404, { error: 'El archivo no está disponible.' });
+        const range = req.headers.range;
+        let start = 0; let end = job.size - 1;
+        if (range) {
+          const match = /^bytes=(\d*)-(\d*)$/.exec(range);
+          if (!match || (!match[1] && !match[2])) { res.writeHead(416, { 'Content-Range': `bytes */${job.size}` }); return res.end(); }
+          if (!match[1]) { const suffix = Number(match[2]); if (!suffix) { res.writeHead(416, { 'Content-Range': `bytes */${job.size}` }); return res.end(); } start = Math.max(0, job.size - suffix); }
+          else { start = Number(match[1]); if (match[2]) end = Math.min(end, Number(match[2])); }
+          if (!Number.isSafeInteger(start) || !Number.isSafeInteger(end) || start > end || start >= job.size) { res.writeHead(416, { 'Content-Range': `bytes */${job.size}` }); return res.end(); }
+        }
+        const encodedName = encodeURIComponent(job.filename).replace(/['()*]/g, char => `%${char.charCodeAt(0).toString(16).toUpperCase()}`);
+        const headers = { 'Content-Type': 'application/octet-stream', 'Content-Disposition': `attachment; filename="download"; filename*=UTF-8''${encodedName}`, 'Content-Length': String(job.size ? end - start + 1 : 0), 'Accept-Ranges': 'bytes', 'Cache-Control': 'private, no-store', 'Referrer-Policy': 'no-referrer', 'X-Content-Type-Options': 'nosniff' };
+        if (range) headers['Content-Range'] = `bytes ${start}-${end}/${job.size}`;
+        res.writeHead(range ? 206 : 200, headers);
+        if (!job.size) return res.end();
+        const stream = fs.createReadStream(debrid.pathFor(job.id), { start, end });
+        stream.on('error', () => res.destroy());
+        res.on('close', () => stream.destroy());
+        return stream.pipe(res);
+      }
+      const auth = /^Bearer ([A-Za-z0-9_-]{24,512})$/.exec(req.headers.authorization || '')?.[1] || '';
+      if (!debrid.authorized(auth)) return sendJson(401, { error: 'Clave del servicio incorrecta.' });
+      const match = req.url.match(/^\/api\/debrid\/jobs\/([a-f0-9]{64})$/);
+      if (match && req.method === 'GET') {
+        const job = await debrid.get(match[1]);
+        if (!job) return sendJson(404, { error: 'La descarga no está disponible.' });
+        return sendJson(200, { ...job, ...(job.state === 'ready' ? { downloadPath: `/api/debrid/files/${job.id}` } : {}) });
+      }
+      if (req.url !== '/api/debrid/jobs' || req.method !== 'POST') return sendJson(404, { error: 'Ruta no encontrada.' });
+      if (!/^application\/json(?:\s*;|$)/i.test(req.headers['content-type'] || '')) return sendJson(415, { error: 'La solicitud debe ser JSON.' });
+      let body = '';
+      for await (const chunk of req) { body += chunk; if (body.length > 8192) return sendJson(413, { error: 'La solicitud es demasiado grande.' }); }
+      let input; try { input = JSON.parse(body); } catch { return sendJson(400, { error: 'Solicitud inválida.' }); }
+      if (typeof input?.url !== 'string' || input.url.length > 4096 || typeof (input.password ?? '') !== 'string' || typeof (input.apiKey ?? '') !== 'string') return sendJson(400, { error: 'Solicitud inválida.' });
+      const id = await debrid.submit({ url: input.url, password: input.password ?? '', apiKey: input.apiKey ?? '' });
+      if (!id) return sendJson(429, { error: 'El almacenamiento está ocupado. Inténtalo más tarde.' });
+      return sendJson(202, { id });
+    }
     if (req.method === 'GET' && (req.url === '/' || req.url === '/index.html')) {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'X-Content-Type-Options': 'nosniff' });
       return res.end(html);
@@ -252,11 +297,31 @@ function createServer(fetcher = fetch, allowedOrigin = process.env.ALLOWED_ORIGI
         ? await resolveAkira(input.url, fetcher, input?.password ?? '')
         : await resolveLink(input?.url, fetcher, input?.password ?? '');
     return sendJson(result.status, result.url ? { url: result.url } : { error: result.error, ...(result.retryAfter ? { retryAfter: result.retryAfter } : {}), ...(result.verificationUrl ? { verificationUrl: result.verificationUrl } : {}) });
+  }
+  return http.createServer((req, res) => {
+    void handle(req, res).catch(() => {
+      if (res.headersSent) return res.destroy();
+      res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
+      res.end(JSON.stringify({ error: 'No se pudo completar la solicitud.' }));
+    });
   });
 }
 
 if (require.main === module) {
   const port = Number(process.env.PORT) || 4173;
-  createServer().listen(port, '0.0.0.0', () => console.log(`Rootz Link listo en http://localhost:${port}`));
+  let debrid = null;
+  if (process.env.DEBRID_DATA_DIR && process.env.DEBRID_ACCESS_TOKEN) {
+    const positive = (value, fallback) => { const n = Number(value); return Number.isSafeInteger(n) && n > 0 ? n : fallback; };
+    debrid = createDebrid({ directory: process.env.DEBRID_DATA_DIR, accessToken: process.env.DEBRID_ACCESS_TOKEN,
+      maxBytes: positive(process.env.DEBRID_MAX_BYTES, 10 * 1024 ** 3), totalBytes: positive(process.env.DEBRID_TOTAL_BYTES, 20 * 1024 ** 3),
+      ttlMs: positive(process.env.DEBRID_TTL_MS, 60 * 60 * 1000), resolveSource: input => {
+      if (fichierIdFromUrl(input.url)) return resolveFichier(input.url, fetch, input.apiKey, input.password);
+      if (akiraIdFromUrl(input.url)) return resolveAkira(input.url, fetch, input.password);
+      if (shortIdFromUrl(input.url)) return resolveLink(input.url, fetch, input.password);
+      try { const direct = new URL(input.url); if (allowedDownloadUrl(input.url) && ['akirabox.to', 'akirabox.com'].includes(direct.hostname) && /^\/download\/[^/]+\/[^/]+$/.test(direct.pathname)) return Promise.resolve({ status: 200, url: direct.href }); } catch {}
+      return Promise.resolve({ status: 400, error: 'Introduce un enlace compatible.' });
+    } });
+  }
+  createServer(fetch, process.env.ALLOWED_ORIGIN || '', debrid).listen(port, '0.0.0.0', () => console.log(`Link Studio listo en http://localhost:${port}`));
 }
 module.exports = { shortIdFromUrl, akiraIdFromUrl, fichierIdFromUrl, resolveLink, resolveAkira, resolveFichier, createServer };

@@ -71,6 +71,9 @@
     .submit svg { width:17px; }
     .hint { color:#9c94a0; margin:18px 0 0; font-size:11px; line-height:1.65; }
     .hint strong { color:#cec5d1; font-weight:600; }
+    .mode-option { display:flex; align-items:center; gap:9px; margin:14px 0 0; font-size:12px; }
+    .mode-option input { width:16px; height:16px; padding:0; accent-color:#cdb1e9; }
+    .job-status { margin:14px 0 0; color:#d9c8e8; font-size:12px; line-height:1.5; }
     .cooldown { color:#e3c999; font-size:12px; margin:13px 0 0; line-height:1.55; }
     .cooldown:empty { display:none; }
     .message { margin:16px 0 0; color:#ffc0bb; font-size:13px; line-height:1.5; }
@@ -126,7 +129,13 @@
                   <p class="hint">Requiere una cuenta compatible. La clave se envía al servidor para consultar 1fichier.</p>
                   <details><summary>El archivo tiene contraseña</summary><div class="password-field"><label for="fichier-password">Contraseña del archivo</label><div class="input-wrap"><input id="fichier-password" type="password" autocomplete="off" maxlength="1024" placeholder="Escribe la contraseña"></div></div></details>
                 </div>
+                <details id="debrid-options"><summary>Usar mi servicio de descargas</summary>
+                  <p class="hint">Guarda temporalmente el archivo en tu servidor y crea un enlace de descarga.</p>
+                  <label class="mode-option"><input id="debrid-enabled" type="checkbox"> Guardar en mi servicio</label>
+                  <div class="password-field" id="debrid-key-field" hidden><label for="debrid-key">Clave del servicio</label><div class="input-wrap"><input id="debrid-key" type="password" autocomplete="off" maxlength="512" placeholder="Introduce la clave del servicio"></div></div>
+                </details>
                 <button class="submit" id="submit" type="submit"><span>Obtener enlace directo</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button>
+                <p class="job-status" id="job-status" role="status" hidden></p>
                 <p class="cooldown" id="cooldown" aria-live="off"></p>
                 <p class="hint"><strong>Formatos:</strong> rootz.so/d/... · akirabox.to/.../file · 1fichier.com/?...<br>La consulta puede contar como una descarga.</p>
                 <p class="message" id="message" role="alert" hidden></p><div class="verification" id="verification" hidden><span id="verification-help">En AkiraBox, completa la verificación y copia la dirección del botón de descarga.</span><br><a id="verification-link" target="_blank" rel="noopener noreferrer">Abrir AkiraBox ↗</a></div>
@@ -163,6 +172,10 @@
     const rootzOptions = document.querySelector('#rootz-options');
     const fichierKey = document.querySelector('#fichier-key');
     const fichierPassword = document.querySelector('#fichier-password');
+    const debridEnabled = document.querySelector('#debrid-enabled');
+    const debridKey = document.querySelector('#debrid-key');
+    const debridKeyField = document.querySelector('#debrid-key-field');
+    const jobStatus = document.querySelector('#job-status');
     function isFichier(value) {
       try { const u = new URL(value.trim()); return u.protocol === 'https:' && ['1fichier.com', 'www.1fichier.com'].includes(u.hostname); }
       catch { return false; }
@@ -209,17 +222,31 @@
     let busy = false;
     let retryAt = 0;
     let timer;
+    function showVerification(value) {
+      try {
+        const target = new URL(value);
+        if (target.origin === 'https://akirabox.to' && /^\/[a-zA-Z0-9_-]{1,100}\/file$/.test(target.pathname)) {
+          verificationLink.href = target.href; verificationLink.textContent = 'Abrir AkiraBox ↗';
+          verificationHelp.textContent = 'En AkiraBox, completa la verificación y copia la dirección del botón de descarga.'; verification.hidden = false;
+        } else if (target.origin === 'https://1fichier.com' && target.pathname === '/' && /^\?[a-z0-9]{5,20}$/.test(target.search)) {
+          verificationLink.href = target.href; verificationLink.textContent = 'Abrir 1fichier ↗';
+          verificationHelp.textContent = 'También puedes abrir el archivo en 1fichier y seguir sus pasos de descarga.'; verification.hidden = false;
+        }
+      } catch { /* Ignore invalid verification links. */ }
+    }
     function showError(text) { message.textContent = text; message.hidden = false; }
-    function invalidate() { revision++; result.hidden = true; message.hidden = true; verification.hidden = true; copyStatus.textContent = ''; updateProviderFields(); updateButton(); }
+    function invalidate() { revision++; result.hidden = true; message.hidden = true; verification.hidden = true; jobStatus.hidden = true; copyStatus.textContent = ''; updateProviderFields(); updateButton(); }
     input.addEventListener('input', invalidate);
     password.addEventListener('input', invalidate);
     fichierKey.addEventListener('input', invalidate);
     fichierPassword.addEventListener('input', invalidate);
+    debridKey.addEventListener('input', invalidate);
+    debridEnabled.addEventListener('change', () => { debridKeyField.hidden = !debridEnabled.checked; invalidate(); });
     function updateButton() {
       const remaining = Math.max(0, Math.ceil((retryAt - Date.now()) / 1000));
-      button.disabled = busy || (remaining > 0 && !!cacheKey(input.value) && !cachedLink(input.value));
+      button.disabled = busy || (!debridEnabled.checked && remaining > 0 && !!cacheKey(input.value) && !cachedLink(input.value));
       button.querySelector('span').textContent = busy ? 'Buscando enlace...' : 'Obtener enlace directo';
-      cooldown.textContent = remaining ? `Rootz permite nuevas consultas en ${remaining} s. Los enlaces recientes de esta pestaña se pueden reutilizar.` : '';
+      cooldown.textContent = remaining && !debridEnabled.checked ? `Rootz permite nuevas consultas en ${remaining} s. Los enlaces recientes de esta pestaña se pueden reutilizar.` : '';
       if (!remaining && timer) { clearInterval(timer); timer = null; }
     }
     function startCooldown(seconds) {
@@ -235,16 +262,18 @@
     form.addEventListener('submit', async event => {
       event.preventDefault();
       if (busy) return;
-      result.hidden = true; message.hidden = true; verification.hidden = true;
-      const cached = cachedLink(input.value);
+      result.hidden = true; message.hidden = true; verification.hidden = true; jobStatus.hidden = true;
+      const cached = debridEnabled.checked ? null : cachedLink(input.value);
       if (cached) { showResult(cached, true); return; }
-      if (Date.now() < retryAt && cacheKey(input.value)) return;
+      if (!debridEnabled.checked && Date.now() < retryAt && cacheKey(input.value)) return;
       if (!input.value.trim()) { showError('Pega un enlace de Rootz, AkiraBox o 1fichier para continuar.'); input.focus(); return; }
       const submittedRevision = revision;
       const submittedUrl = input.value.trim();
       const fichier = isFichier(submittedUrl);
       const submittedPassword = fichier ? fichierPassword.value : password.value;
       const submittedKey = fichier ? fichierKey.value : '';
+      const useDebrid = debridEnabled.checked;
+      const serviceKey = useDebrid ? debridKey.value : '';
       busy = true; updateButton();
       try {
         const apiBase = document.querySelector('meta[name="rootz-api-base"]').content.trim();
@@ -255,29 +284,47 @@
           if (base.protocol !== 'https:' || base.username || base.password) throw new Error('La dirección del servidor no es válida.');
           endpoint = new URL('/api/resolve', base).href;
         }
-        if (submittedKey && !window.isSecureContext) throw new Error('Usa HTTPS para enviar tu clave API de forma segura.');
+        if ((submittedKey || serviceKey) && !window.isSecureContext) throw new Error('Usa HTTPS para enviar tus claves de forma segura.');
+        if (useDebrid) {
+          if (!serviceKey) throw new Error('Introduce la clave del servicio de descargas.');
+          const serviceBase = new URL(endpoint, location.href).origin;
+          const created = await fetch(`${serviceBase}/api/debrid/jobs`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${serviceKey}` }, body: JSON.stringify({ url: submittedUrl, password: submittedPassword, ...(fichier ? { apiKey: submittedKey } : {}) }) });
+          const queued = await created.json();
+          if (!created.ok || !/^[a-f0-9]{64}$/.test(queued.id || '')) throw new Error(queued.error || 'No se pudo iniciar la descarga.');
+          jobStatus.hidden = false; jobStatus.textContent = 'Descarga en cola...';
+          while (revision === submittedRevision) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            if (revision !== submittedRevision) return;
+            const response = await fetch(`${serviceBase}/api/debrid/jobs/${queued.id}`, { headers: { Authorization: `Bearer ${serviceKey}` }, cache: 'no-store' });
+            const job = await response.json();
+            if (!response.ok) throw new Error(job.error || 'No se pudo consultar la descarga.');
+            if (job.state === 'error') {
+              if (typeof job.verificationUrl === 'string') showVerification(job.verificationUrl);
+              throw new Error(job.error || 'No se pudo descargar el archivo.');
+            }
+            if (job.state === 'ready') {
+              const expected = `/api/debrid/files/${queued.id}`;
+              if (job.downloadPath !== expected) throw new Error('El servidor devolvió un enlace inválido.');
+              showResult(new URL(expected, serviceBase).href, false);
+              resultSource.textContent = 'Enlace temporal: cualquiera que lo tenga puede descargar el archivo.';
+              jobStatus.textContent = 'Archivo listo para descargar.'; return;
+            }
+            const size = job.size ? ` · ${(job.size / 1024 ** 2).toFixed(1)} MB` : '';
+            jobStatus.textContent = job.state === 'downloading' ? `Descargando archivo${size}...` : job.state === 'resolving' ? 'Obteniendo enlace del proveedor...' : 'Descarga en cola...';
+          }
+          return;
+        }
         const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: submittedUrl, password: submittedPassword, ...(fichier ? { apiKey: submittedKey } : {}) }) });
         const data = await response.json();
         if (response.status === 429 && Number.isFinite(data.retryAfter) && data.retryAfter > 0) startCooldown(data.retryAfter);
         if (revision !== submittedRevision) return;
         if (!response.ok || !data.url) {
-          if ((response.status === 403 || response.status === 401) && typeof data.verificationUrl === 'string') {
-            try {
-              const target = new URL(data.verificationUrl);
-              if (target.origin === 'https://akirabox.to' && /^\/[a-zA-Z0-9_-]{1,100}\/file$/.test(target.pathname)) {
-                verificationLink.href = target.href; verificationLink.textContent = 'Abrir AkiraBox ↗';
-                verificationHelp.textContent = 'En AkiraBox, completa la verificación y copia la dirección del botón de descarga.'; verification.hidden = false;
-              } else if (target.origin === 'https://1fichier.com' && target.pathname === '/' && /^\?[a-z0-9]{5,20}$/.test(target.search)) {
-                verificationLink.href = target.href; verificationLink.textContent = 'Abrir 1fichier ↗';
-                verificationHelp.textContent = 'También puedes abrir el archivo en 1fichier y seguir sus pasos de descarga.'; verification.hidden = false;
-              }
-            } catch { /* Ignore invalid verification links. */ }
-          }
+          if ((response.status === 403 || response.status === 401) && typeof data.verificationUrl === 'string') showVerification(data.verificationUrl);
           throw new Error(data.error || 'No se pudo obtener el enlace.');
         }
         if (!submittedPassword) rememberLink(submittedUrl, data.url);
         showResult(data.url, false);
-      } catch (error) { if (revision === submittedRevision) showError(error instanceof TypeError || error instanceof SyntaxError ? 'No se pudo conectar con el servidor de descargas. Inténtalo de nuevo más tarde.' : error.message || 'No se pudo conectar con el servicio.'); }
+      } catch (error) { if (revision === submittedRevision) { jobStatus.hidden = true; showError(error instanceof TypeError || error instanceof SyntaxError ? 'No se pudo conectar con el servidor de descargas. Inténtalo de nuevo más tarde.' : error.message || 'No se pudo conectar con el servicio.'); } }
       finally { busy = false; updateButton(); }
     });
     copy.addEventListener('click', async () => {

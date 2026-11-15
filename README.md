@@ -40,7 +40,21 @@ El servidor permite peticiones desde `https://edwinadansalazar961-afk.github.io`
 
 <!-- coderabbit-ai-generated-section:v1:371f04231cc37fd52f2ba40be7814effe7dbb95f0cc1acf95283a0944c7a1cba -->
 
+<!-- coderabbit-ai-generated:v1 -->
+
+<!-- coderabbit-ai-generated-section:v1:6d3306520a7d6a574b6400c2e6e7ed3933228da92915069e5b76946e098130a5 -->
+
+## Servicio propio de descargas (prototipo)
+
+El servicio opcional descarga archivos compatibles a una carpeta local y devuelve un enlace temporal. Para activarlo, configura `DEBRID_DATA_DIR` con una carpeta dedicada y `DEBRID_ACCESS_TOKEN` con una clave aleatoria de 24 a 512 caracteres URL-safe, y reinicia el servidor. Introduce esa misma clave en «Usar mi servicio de descargas». No publiques la clave ni la guardes en el repositorio.
+
+Solo se procesa una descarga a la vez, con un máximo de cinco trabajos. Por defecto, los archivos se conservan una hora, con un máximo de 10 GiB por archivo y 20 GiB en total. Se pueden ajustar con `DEBRID_TTL_MS`, `DEBRID_MAX_BYTES` y `DEBRID_TOTAL_BYTES`. El enlace es una dirección difícil de adivinar: cualquiera que la tenga puede descargar el archivo. Los trabajos viven en memoria y se pierden al reiniciar. El servicio gratuito de Render usa almacenamiento temporal y elimina los archivos al reiniciar o suspenderse.
+
+El servicio propio no elimina por sí mismo los requisitos de los proveedores: AkiraBox puede pedir una verificación y 1fichier una clave API y créditos. Si AkiraBox entrega una URL directa tras la verificación, también puedes introducir esa URL en el modo de servicio. El prototipo acepta descargas HTTPS de los dominios compatibles y conexiones IPv4 públicas.
+
 ## 1fichier
+
+<!-- /coderabbit-ai-generated:v1 -->
 
 Para generar enlaces de 1fichier, introduce en la página una clave API de una cuenta compatible (Premium, Premium Light, Premium GOLD, Access o CDN). La clave se envía al servidor de la aplicación y de ahí a la API oficial de 1fichier; úsala solo a través de HTTPS y con un servidor de confianza. Se procesa para esa solicitud y no se guarda. Si el archivo tiene contraseña, introdúcela en el campo opcional. La API indica que el enlace generado es temporal y normalmente tiene una validez de cinco minutos.
 
